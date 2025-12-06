@@ -9,6 +9,11 @@ const Color kWhiteColor = Colors.white;
 const Color kWhiteColor70 = Colors.white60;
 const Color kBlackColor = Colors.black;
 const Color kBlackColor87 = Colors.black87;
+const Color kBlackColor54 = Colors.black54;
+const Color kBlackColor45 = Colors.black45;
+const Color kBlackColor38 = Colors.black38;
+const Color kBlackColor26 = Colors.black26;
+const Color kBlackColor12 = Colors.black12;
 const Color kBlueColor = Colors.blue;
 const Color kGreenColor = Colors.green;
 

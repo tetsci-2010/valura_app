@@ -11,6 +11,12 @@ class AppTheme {
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         },
       ),
+      fontFamily: 'BYekan',
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: kPrimaryColor,
+        foregroundColor: kWhiteColor,
+      ),
+      appBarTheme: AppBarTheme(backgroundColor: kPrimaryColor, foregroundColor: kWhiteColor),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: kPrimaryColor,
         linearTrackColor: kWarningTrackColor,
@@ -70,10 +76,16 @@ class AppTheme {
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         },
       ),
+      fontFamily: 'BYekan',
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: kPrimaryColor,
+        foregroundColor: kWhiteColor,
+      ),
       menuButtonTheme: MenuButtonThemeData(style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(Theme.of(context).scaffoldBackgroundColor))),
       menuTheme: MenuThemeData(
         style: MenuStyle(backgroundColor: WidgetStatePropertyAll(Theme.of(context).scaffoldBackgroundColor)),
       ),
+      appBarTheme: AppBarTheme(backgroundColor: kPrimaryColor, foregroundColor: kWhiteColor),
       datePickerTheme: DatePickerThemeData(locale: Locale('fa')),
       primaryColor: kPrimaryColor,
       shadowColor: lightBoxShadowColor,
@@ -157,7 +169,7 @@ TextTheme getLightTextTheme() {
     ),
     bodyMedium: TextStyle(
       fontSize: sizeConstants.fontBodyMedium,
-      color: kBlackColor87,
+      color: kPrimaryColor,
     ),
     labelLarge: TextStyle(
       fontSize: sizeConstants.fontLabelLarge,
