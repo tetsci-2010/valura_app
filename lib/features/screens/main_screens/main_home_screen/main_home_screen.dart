@@ -39,7 +39,7 @@ class MainHomeScreen extends StatelessWidget {
                     offset: Offset(0, 0),
                     blurRadius: 12,
                     spreadRadius: 5,
-                    color: kBlackColor12,
+                    color: Theme.of(context).brightness == Brightness.light ? kBlackColor12 : kGreyColor800.withAlpha(70),
                   ),
                 ],
               ),
@@ -63,7 +63,14 @@ class MainHomeScreen extends StatelessWidget {
                         color: selectedIndex == index ? Theme.of(context).primaryColor : null,
                       ),
                       alignment: Alignment.center,
-                      child: Icon(homeNavBtns[index], color: selectedIndex == index ? kWhiteColor : null),
+                      child: Icon(
+                        homeNavBtns[index],
+                        color: selectedIndex == index
+                            ? kWhiteColor
+                            : Theme.of(context).brightness == Brightness.light
+                            ? kGreyColor400
+                            : kGreyColor700,
+                      ),
                     ),
                   ),
                 ),

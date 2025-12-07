@@ -219,7 +219,7 @@ TextTheme getDarkTextTheme() {
     ),
     bodyMedium: TextStyle(
       fontSize: sizeConstants.fontBodyMedium,
-      color: kWhiteColor70,
+      color: kWhiteColor,
     ),
     labelLarge: TextStyle(
       fontSize: sizeConstants.fontLabelLarge,

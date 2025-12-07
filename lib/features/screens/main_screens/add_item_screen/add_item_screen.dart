@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:valura/constants/colors.dart';
 import 'package:valura/features/data/models/item_model.dart';
+import 'package:valura/features/data/providers/app_provider.dart';
 import 'package:valura/features/screens/main_screens/home_screen/home_screen.dart';
 import 'package:valura/packages/dropdown_search_package/dropdown_search_package.dart';
+import 'package:valura/packages/sqflite_package/sqflite_package.dart';
+import 'package:valura/packages/sqflite_package/sqflite_queries.dart';
+import 'package:valura/utils/dependency_injection.dart';
 import 'package:valura/utils/size_constant.dart';
 
 class AddItemScreen extends StatelessWidget {
@@ -29,13 +34,28 @@ class AddItemScreen extends StatelessWidget {
                   Flexible(
                     child: DropdownSearchPackage.dropdownSearch<ItemModel>(
                       itemAsString: (item) => item.name,
-                      items: (filter, loadProps) => [
-                        ItemModel(name: 'name', cost: 0, landCost: 0, newRate: 0),
-                        ItemModel(name: 'name1', cost: 0, landCost: 0, newRate: 0),
-                        ItemModel(name: 'name2', cost: 0, landCost: 0, newRate: 0),
-                        ItemModel(name: 'name3', cost: 0, landCost: 0, newRate: 0),
-                        ItemModel(name: 'name4', cost: 0, landCost: 0, newRate: 0),
-                      ],
+                      dropdownBuilder: (context, item) => Text(
+                        item?.name ?? '',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      items: (filter, _) async {
+                        if (filter.isEmpty) return context.read<AppProvider>().dropDownItems;
+                        // <- filter comes automatically
+                        try {
+                          final db = SqflitePackage();
+                          List<Map<String, dynamic>> maps = await db.query(
+                            table: itemsTable,
+                            where: 'name LIKE ?',
+                            whereArgs: ['%$filter%'],
+                            limit: 50,
+                          );
+                          List<ItemModel> itemss = maps.map((e) => ItemModel.fromDB(e)).toList();
+                          di<AppProvider>().updateDropDownItems(items: itemss);
+                          return itemss;
+                        } catch (e) {
+                          return [];
+                        }
+                      },
                       showSearchBox: true,
                     ),
                   ),
@@ -57,6 +77,30 @@ class AddItemScreen extends StatelessWidget {
                 ],
               ),
             ),
+            Container(
+              padding: EdgeInsets.fromLTRB(
+                sizeConstants.spacing20,
+                sizeConstants.spacing2,
+                sizeConstants.spacing20,
+                sizeConstants.spacing12,
+              ),
+              decoration: BoxDecoration(
+                border: BoxBorder.fromLTRB(bottom: BorderSide(color: Theme.of(context).primaryColor.withAlpha(100))),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('جمع کل:'),
+                  Flexible(
+                    child: Text(
+                      '۱۲۰۰ ؋',
+                      textDirection: TextDirection.ltr,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
         Expanded(
@@ -69,7 +113,16 @@ class AddItemScreen extends StatelessWidget {
             mainAxisSpacing: sizeConstants.spacing12,
             itemBuilder: (context, index) {
               return ItemPartCard(
-                item: ItemModel(name: 'تیغه ۱۴ میلی متری برنجی', cost: 10, landCost: 12, newRate: 15),
+                item: ItemModel(
+                  id: 0,
+                  itemId: 0,
+                  purchaseRate: 0,
+                  description: '',
+                  name: 'تیغه ۱۴ میلی متری برنجی',
+                  unitCost: 10,
+                  landCost: 12,
+                  newRate: 15,
+                ),
               );
             },
           ),
@@ -93,7 +146,7 @@ class ItemPartCard extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             offset: Offset(0, 0),
-            color: kBlackColor12.withAlpha(20),
+            color: Theme.of(context).brightness == Brightness.light ? kBlackColor12.withAlpha(20) : kGreyColor800.withAlpha(70),
             blurRadius: 7,
             spreadRadius: 2,
           ),
@@ -139,7 +192,7 @@ class ItemPartCard extends StatelessWidget {
               ),
 
               SizedBox(width: sizeConstants.spacing8),
-              Flexible(child: Text('${item.cost} ؋', maxLines: 1, textDirection: TextDirection.ltr)),
+              Flexible(child: Text('${item.unitCost} ؋', maxLines: 1, textDirection: TextDirection.ltr)),
             ],
           ),
           Row(
@@ -177,7 +230,7 @@ class ItemPartCard extends StatelessWidget {
                 ),
               ),
               SizedBox(width: sizeConstants.spacing8),
-              Flexible(child: Text('${item.cost} ؋', maxLines: 1, textDirection: TextDirection.ltr)),
+              Flexible(child: Text('${item.unitCost} ؋', maxLines: 1, textDirection: TextDirection.ltr)),
             ],
           ),
           Row(
