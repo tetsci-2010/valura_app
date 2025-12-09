@@ -23,6 +23,7 @@ class AppTheme {
         refreshBackgroundColor: kWarningBgColor,
       ),
       datePickerTheme: DatePickerThemeData(locale: Locale('fa')),
+      typography: Typography.material2021(),
       popupMenuTheme: PopupMenuThemeData(
         color: Theme.of(context).scaffoldBackgroundColor,
         textStyle: Theme.of(context).textTheme.titleMedium,
@@ -77,6 +78,7 @@ class AppTheme {
         },
       ),
       fontFamily: 'BYekan',
+      typography: Typography.material2021(),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: kPrimaryColor,
         foregroundColor: kWhiteColor,

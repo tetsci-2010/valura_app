@@ -6,6 +6,7 @@ import 'package:valura/constants/colors.dart';
 import 'package:valura/features/data/blocs/create_item_bloc/create_item_bloc.dart';
 import 'package:valura/features/data/models/item_model.dart';
 import 'package:valura/features/screens/main_screens/home_screen/home_screen.dart';
+import 'package:valura/helpers/number_formatters.dart';
 import 'package:valura/packages/toast_package/toast_package.dart';
 import 'package:valura/utils/size_constant.dart';
 
@@ -257,11 +258,11 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
                                   ItemModel item = ItemModel(
                                     id: 0,
                                     itemId: 0,
-                                    purchaseRate: num.tryParse(purchaseRateController.text.trim()) ?? 0,
+                                    purchaseRate: num.tryParse(NumberFormatters.toEnglishDigits(purchaseRateController.text.trim())) ?? 0,
                                     name: nameController.text.trim(),
-                                    unitCost: num.tryParse(purchaseRateController.text.trim()) ?? 0,
-                                    landCost: num.tryParse(landingExpenseController.text.trim()) ?? 0,
-                                    newRate: num.tryParse(unitCostController.text.trim()) ?? 0,
+                                    unitCost: num.tryParse(NumberFormatters.toEnglishDigits(unitCostController.text.trim())) ?? 0,
+                                    landCost: num.tryParse(NumberFormatters.toEnglishDigits(landingExpenseController.text.trim())) ?? 0,
+                                    newRate: num.tryParse(NumberFormatters.toEnglishDigits(newRateController.text.trim())) ?? 0,
                                     description: descController.text.trim(),
                                   );
                                   context.read<CreateItemBloc>().add(CreateItem(itemModel: item));

@@ -37,22 +37,22 @@ class LocalDataDataSourceImp implements ILocalDataDataSource {
     } on DatabaseException catch (e) {
       final msg = e.toString();
       if (e.isOpenFailedError()) {
-        throw AppException(errorMessage: SqfliteCodes.dbOpenFailed, statusCode: '1105');
+        throw AppException(SqfliteCodes.dbOpenFailed, '1105');
       } else if (e.isSyntaxError()) {
-        throw AppException(errorMessage: SqfliteCodes.sqlSyntaxError, statusCode: '1103');
+        throw AppException(SqfliteCodes.sqlSyntaxError, '1103');
       } else if (e.isNoSuchTableError()) {
-        throw AppException(errorMessage: SqfliteCodes.tableNotFound, statusCode: '1102');
+        throw AppException(SqfliteCodes.tableNotFound, '1102');
       } else if (e.isDatabaseClosedError()) {
-        throw AppException(errorMessage: SqfliteCodes.dbClosed, statusCode: '1104');
+        throw AppException(SqfliteCodes.dbClosed, '1104');
       } else if (msg.contains("UNIQUE constraint failed")) {
-        throw AppException(errorMessage: SqfliteCodes.uniqueConstraintFailed, statusCode: '1100');
+        throw AppException(SqfliteCodes.uniqueConstraintFailed, '1100');
       } else if (msg.contains("foreign key constraint")) {
-        throw AppException(errorMessage: SqfliteCodes.foreignKeyConstraintFailed, statusCode: '1101');
+        throw AppException(SqfliteCodes.foreignKeyConstraintFailed, '1101');
       } else {
-        throw AppException(errorMessage: SqfliteCodes.databaseException, statusCode: '1000');
+        throw AppException(SqfliteCodes.databaseException, '1000');
       }
     } catch (e) {
-      throw AppException(errorMessage: SqfliteCodes.unknowDatabaseError, statusCode: '1999');
+      throw AppException(SqfliteCodes.unknowDatabaseError, '1999');
     }
   }
 }

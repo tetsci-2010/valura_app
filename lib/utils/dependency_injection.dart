@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:valura/features/data/blocs/create_item_bloc/create_item_bloc.dart';
 import 'package:valura/features/data/blocs/localization_bloc/localization_bloc.dart';
+import 'package:valura/features/data/providers/add_item_provider.dart';
 import 'package:valura/features/data/providers/app_provider.dart';
 import 'package:valura/features/data/repository/local_idata_repository/local_idata_repository.dart';
 import 'package:valura/features/data/services/item_service.dart';
@@ -13,6 +14,9 @@ Future<void> setupDI() async {
 
   /// 🔹 BLOCS
   di.registerLazySingleton(() => AppProvider());
+
+  /// 🔹 BLOCS
+  di.registerLazySingleton(() => AddItemProvider());
 
   ///
   di.registerLazySingleton<LocalDataRepositoryImp>(() => localIDataRepository);

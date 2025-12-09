@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:provider/provider.dart';
 import 'package:valura/constants/colors.dart';
 import 'package:valura/features/data/models/item_model.dart';
+import 'package:valura/features/data/notifiers/add_item_notifier.dart';
+import 'package:valura/features/data/providers/add_item_provider.dart';
 import 'package:valura/features/data/providers/app_provider.dart';
 import 'package:valura/features/screens/main_screens/home_screen/home_screen.dart';
 import 'package:valura/packages/dropdown_search_package/dropdown_search_package.dart';
@@ -12,10 +14,27 @@ import 'package:valura/packages/sqflite_package/sqflite_queries.dart';
 import 'package:valura/utils/dependency_injection.dart';
 import 'package:valura/utils/size_constant.dart';
 
-class AddItemScreen extends StatelessWidget {
+class AddItemScreen extends StatefulWidget {
   static const String id = '/add_item_screen';
   static const String name = 'add_item_screen';
   const AddItemScreen({super.key});
+
+  @override
+  State<AddItemScreen> createState() => _AddItemScreenState();
+}
+
+class _AddItemScreenState extends State<AddItemScreen> {
+  @override
+  void initState() {
+    super.initState();
+    AddItemNotifier.total = ValueNotifier(0);
+  }
+
+  @override
+  void dispose() {
+    AddItemNotifier.disposeTotal();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,13 +52,28 @@ class AddItemScreen extends StatelessWidget {
                 children: [
                   Flexible(
                     child: DropdownSearchPackage.dropdownSearch<ItemModel>(
+                      onChanged: (item) {
+                        if (item != null) {
+                          context.read<AddItemProvider>().addItem(item);
+                        }
+                      },
                       itemAsString: (item) => item.name,
                       dropdownBuilder: (context, item) => Text(
                         item?.name ?? '',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       items: (filter, _) async {
-                        if (filter.isEmpty) return context.read<AppProvider>().dropDownItems;
+                        if (filter.isEmpty) {
+                          List<ItemModel> list = context.read<AppProvider>().dropDownItems;
+                          if (list.isEmpty) {
+                            SqflitePackage db = SqflitePackage();
+                            List<Map<String, dynamic>> dbList = await db.query(table: itemsTable, limit: 50);
+                            List<ItemModel> pDbList = dbList.map((e) => ItemModel.fromDB(e)).toList();
+                            return pDbList;
+                          } else {
+                            return list;
+                          }
+                        }
                         // <- filter comes automatically
                         try {
                           final db = SqflitePackage();
@@ -104,25 +138,35 @@ class AddItemScreen extends StatelessWidget {
           ],
         ),
         Expanded(
-          child: AlignedGridView.count(
-            padding: EdgeInsets.fromLTRB(sizeConstants.spacing16, sizeConstants.spacing12, sizeConstants.spacing16, sizeConstants.spacing20),
-            physics: BouncingScrollPhysics(),
-            itemCount: 10,
-            crossAxisCount: 1,
-            crossAxisSpacing: sizeConstants.spacing12,
-            mainAxisSpacing: sizeConstants.spacing12,
-            itemBuilder: (context, index) {
-              return ItemPartCard(
-                item: ItemModel(
-                  id: 0,
-                  itemId: 0,
-                  purchaseRate: 0,
-                  description: '',
-                  name: 'تیغه ۱۴ میلی متری برنجی',
-                  unitCost: 10,
-                  landCost: 12,
-                  newRate: 15,
-                ),
+          child: Selector<AddItemProvider, List<ItemModel>>(
+            selector: (context, addItemProvider) => addItemProvider.addedItems,
+            builder: (context, addedItems, child) {
+              if (addedItems.isEmpty) {
+                return Center(
+                  child: Text('لیست خالی هست'),
+                );
+              }
+              return AlignedGridView.count(
+                padding: EdgeInsets.fromLTRB(sizeConstants.spacing16, sizeConstants.spacing12, sizeConstants.spacing16, sizeConstants.spacing20),
+                physics: BouncingScrollPhysics(),
+                itemCount: addedItems.length,
+                crossAxisCount: 1,
+                crossAxisSpacing: sizeConstants.spacing12,
+                mainAxisSpacing: sizeConstants.spacing12,
+                itemBuilder: (context, index) {
+                  return ItemPartCard(
+                    item: ItemModel(
+                      id: addedItems[index].id,
+                      itemId: addedItems[index].itemId,
+                      purchaseRate: addedItems[index].purchaseRate,
+                      description: addedItems[index].description,
+                      name: addedItems[index].name,
+                      unitCost: addedItems[index].unitCost,
+                      landCost: addedItems[index].landCost,
+                      newRate: addedItems[index].newRate,
+                    ),
+                  );
+                },
               );
             },
           ),

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 import 'package:valura/features/data/blocs/create_item_bloc/create_item_bloc.dart';
 import 'package:valura/features/data/blocs/localization_bloc/localization_bloc.dart';
+import 'package:valura/features/data/providers/add_item_provider.dart';
 import 'package:valura/features/data/providers/app_provider.dart';
 import 'package:valura/l10n/app_l10n.dart';
 import 'package:valura/packages/sqflite_package/sqflite_package.dart';
@@ -28,6 +29,7 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => di<AppProvider>()),
+        ChangeNotifierProvider(create: (context) => di<AddItemProvider>()),
       ],
       child: const MyApp(),
     ),

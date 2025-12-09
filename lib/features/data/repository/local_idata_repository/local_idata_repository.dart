@@ -19,7 +19,7 @@ class LocalDataRepositoryImp implements ILocalDataRepository {
     } on AppException catch (_) {
       rethrow;
     } catch (e) {
-      throw AppException(errorMessage: e.toString());
+      throw AppException(e.toString());
     }
   }
 }
