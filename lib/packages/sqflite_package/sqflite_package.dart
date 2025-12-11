@@ -7,7 +7,7 @@ class SqflitePackage {
   static Database? _db;
 
   // 💡 Singleton pattern: only one database instance in whole app
-  static Future<Database> get database async {
+  static Future<Database> get instance async {
     if (_db != null) return _db!;
 
     _db = await _initDB();
@@ -23,12 +23,18 @@ class SqflitePackage {
       path,
       version: 1,
       onCreate: _createTables, // 🔥 Runs the first time DB is created
+      onOpen: (db) async {
+        // await db.execute(createProductsTable);
+        // await db.execute(createProductDetailsTable);
+      },
     );
   }
 
   // 🏗 Define your tables here
   static Future<void> _createTables(Database db, int version) async {
     await db.execute(createItemsTable);
+    await db.execute(createProductsTable);
+    await db.execute(createProductDetailsTable);
   }
 
   /* =========================
@@ -41,7 +47,7 @@ class SqflitePackage {
     required Map<String, dynamic> data,
     ConflictAlgorithm? conflictAlgorithm,
   }) async {
-    final db = await database;
+    final db = await instance;
     return await db.insert(table, data, conflictAlgorithm: conflictAlgorithm);
   }
 
@@ -54,7 +60,7 @@ class SqflitePackage {
     int? limit,
     ConflictAlgorithm? conflictAlgorithm,
   }) async {
-    final db = await database;
+    final db = await instance;
     return await db.query(
       table,
       where: where,
@@ -71,7 +77,7 @@ class SqflitePackage {
     required Map<String, dynamic> data,
     ConflictAlgorithm? conflictAlgorithm,
   }) async {
-    final db = await database;
+    final db = await instance;
     return await db.update(
       table,
       data,
@@ -83,7 +89,7 @@ class SqflitePackage {
 
   /// Delete any row
   Future<int> delete({required String table, int? id}) async {
-    final db = await database;
+    final db = await instance;
     if (id != null) {
       return await db.delete(
         table,
@@ -102,7 +108,7 @@ class SqflitePackage {
     String? orderBy,
     int? limit,
   }) async {
-    final db = await database;
+    final db = await instance;
 
     // Build condition string:  col1 = ? AND col2 = ? ...
     final whereClause = conditions.keys.map((key) => "$key = ?").join(" AND ");
@@ -120,7 +126,7 @@ class SqflitePackage {
   }
 
   Future<Map<String, dynamic>> getLastRow(String table) async {
-    final db = await database;
+    final db = await instance;
 
     final result = await db.query(
       table,

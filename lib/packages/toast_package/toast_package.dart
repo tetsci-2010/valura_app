@@ -4,6 +4,7 @@ import 'package:valura/constants/colors.dart';
 
 class ToastPackage {
   static void showSimpleToast({
+    required BuildContext context,
     required String message,
     AlignmentGeometry? toastAlignment,
     ToastificationStyle? toastStyle,
@@ -14,7 +15,7 @@ class ToastPackage {
   }) {
     Toastification toast = Toastification();
     toast.show(
-      title: Text(message),
+      title: Text(message, style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold)),
       type: ToastificationType.info,
       style: toastStyle,
       alignment: toastAlignment ?? Alignment.topCenter,
@@ -22,10 +23,14 @@ class ToastPackage {
       dragToClose: dragToClose,
       closeOnClick: clickToClose,
       showProgressBar: showProgressBar ?? true,
+      primaryColor: Theme.of(context).primaryColor,
+      progressBarTheme: ProgressIndicatorThemeData(color: Theme.of(context).primaryColor),
+      closeButton: ToastCloseButton(showType: CloseButtonShowType.always),
     );
   }
 
   static void showWarningToast({
+    required BuildContext context,
     required String message,
     AlignmentGeometry? toastAlignment,
     ToastificationStyle? toastStyle,
@@ -37,9 +42,12 @@ class ToastPackage {
     Toastification toast = Toastification();
     toast.dismissAll();
     toast.show(
-      title: Text(message),
+      title: Text(
+        message,
+        style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold, color: kWhiteColor),
+      ),
       type: ToastificationType.warning,
-      backgroundColor: kOrangeAccentColor.withAlpha(20),
+      backgroundColor: kOrangeColor,
       style: toastStyle,
       alignment: toastAlignment ?? Alignment.topCenter,
       autoCloseDuration: closeDuration ?? Duration(seconds: 3),

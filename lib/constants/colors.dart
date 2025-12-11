@@ -39,5 +39,5 @@ const Color kRedColor = Colors.red;
 
 const kYellowColor = Colors.yellow;
 
-const Color darkBoxShadowColor = Colors.black12;
-const Color lightBoxShadowColor = Colors.black26;
+const Color darkBoxShadowColor = kGreyColor;
+const Color lightBoxShadowColor = kBlackColor;

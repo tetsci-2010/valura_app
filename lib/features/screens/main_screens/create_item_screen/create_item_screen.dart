@@ -61,7 +61,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
           child: BlocConsumer<CreateItemBloc, CreateItemState>(
             listener: (context, state) {
               if (state is CreateItemSuccess) {
-                ToastPackage.showSimpleToast(message: 'جنس ثبت شد');
+                ToastPackage.showSimpleToast(context: context,message: 'جنس ثبت شد');
                 nameController.clear();
                 unitCostController.clear();
                 purchaseRateController.clear();
@@ -70,7 +70,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
                 newRateController.clear();
                 descController.clear();
               } else if (state is CreateItemFailure) {
-                ToastPackage.showWarningToast(message: state.errorMessage);
+                ToastPackage.showWarningToast(context: context,message: state.errorMessage);
               }
             },
             builder: (context, state) {

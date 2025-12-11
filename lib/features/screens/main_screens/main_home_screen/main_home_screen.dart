@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:valura/constants/colors.dart';
 import 'package:valura/constants/lists.dart';
+import 'package:valura/features/data/blocs/home_bloc/home_bloc.dart';
 import 'package:valura/features/data/providers/app_provider.dart';
 import 'package:valura/utils/size_constant.dart';
 
@@ -51,6 +52,9 @@ class MainHomeScreen extends StatelessWidget {
                     onTap: () {
                       try {
                         context.read<AppProvider>().updateSelectedScreen(index);
+                        if (index == 1) {
+                          context.read<HomeBloc>().add(FetchProducts());
+                        }
                       } catch (_) {}
                     },
                     child: AnimatedContainer(

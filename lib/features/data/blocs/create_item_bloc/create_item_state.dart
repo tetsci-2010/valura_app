@@ -28,3 +28,22 @@ final class CreateItemFailure extends CreateItemState {
   @override
   List<Object?> get props => [errorMessage, statusCode];
 }
+
+final class CreatingProduct extends CreateItemState {}
+
+final class CreateProductSuccess extends CreateItemState {
+  final String message;
+
+  const CreateProductSuccess({required this.message});
+  @override
+  List<Object?> get props => [message];
+}
+
+final class CreateProductFailure extends CreateItemState {
+  final String errorMessage;
+  final String? statusCode;
+
+  const CreateProductFailure({required this.errorMessage, this.statusCode});
+  @override
+  List<Object?> get props => [errorMessage, statusCode];
+}

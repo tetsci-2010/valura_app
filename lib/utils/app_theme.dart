@@ -35,7 +35,7 @@ class AppTheme {
       menuTheme: MenuThemeData(
         style: MenuStyle(backgroundColor: WidgetStatePropertyAll(Theme.of(context).scaffoldBackgroundColor)),
       ),
-      shadowColor: darkBoxShadowColor,
+      shadowColor: lightBoxShadowColor,
       inputDecorationTheme: InputDecorationTheme(
         hintStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: kPrimaryColor.withAlpha(80), fontWeight: FontWeight.bold),
         labelStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: kPrimaryColor, fontWeight: FontWeight.bold),
@@ -90,7 +90,7 @@ class AppTheme {
       appBarTheme: AppBarTheme(backgroundColor: kPrimaryColor, foregroundColor: kWhiteColor),
       datePickerTheme: DatePickerThemeData(locale: Locale('fa')),
       primaryColor: kPrimaryColor,
-      shadowColor: lightBoxShadowColor,
+      shadowColor: darkBoxShadowColor,
       popupMenuTheme: PopupMenuThemeData(
         color: Theme.of(context).scaffoldBackgroundColor,
         textStyle: Theme.of(context).textTheme.titleMedium,

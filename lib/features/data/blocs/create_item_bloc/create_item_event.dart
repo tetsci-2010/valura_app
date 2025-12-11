@@ -15,3 +15,11 @@ class CreateItem extends CreateItemEvent {
   @override
   List<Object?> get props => [itemModel];
 }
+
+class CreateProduct extends CreateItemEvent {
+  final ProductFormModel product;
+
+  const CreateProduct({required this.product});
+  @override
+  List<Object?> get props => [product];
+}
