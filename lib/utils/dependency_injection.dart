@@ -2,8 +2,10 @@ import 'package:get_it/get_it.dart';
 import 'package:valura/features/data/blocs/create_item_bloc/create_item_bloc.dart';
 import 'package:valura/features/data/blocs/home_bloc/home_bloc.dart';
 import 'package:valura/features/data/blocs/localization_bloc/localization_bloc.dart';
+import 'package:valura/features/data/blocs/product_details_bloc/product_details_bloc.dart';
 import 'package:valura/features/data/providers/add_item_provider.dart';
 import 'package:valura/features/data/providers/app_provider.dart';
+import 'package:valura/features/data/providers/home_provider.dart';
 import 'package:valura/features/data/repository/local_idata_repository/local_idata_repository.dart';
 import 'package:valura/features/data/services/item_service.dart';
 
@@ -19,15 +21,21 @@ Future<void> setupDI() async {
   /// 🔹 Add Item Provider
   di.registerLazySingleton(() => AddItemProvider());
 
+  /// 🔹 Home Provider
+  di.registerLazySingleton(() => HomeProvider());
+
   ///
   di.registerLazySingleton<LocalDataRepositoryImp>(() => localIDataRepository);
 
   ///
   di.registerLazySingleton(() => ItemService(localDataRepositoryImp: di()));
 
-  ///
-  di.registerLazySingleton(() => CreateItemBloc(di()));
-
   /// 🔹 Home Bloc
   di.registerLazySingleton<HomeBloc>(() => HomeBloc(di()));
+
+  ///
+  di.registerLazySingleton(() => CreateItemBloc(di(), di()));
+
+  ///
+  di.registerLazySingleton(() => ProductDetailsBloc(di()));
 }

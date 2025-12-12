@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:getwidget/getwidget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:valura/constants/colors.dart';
@@ -14,7 +12,7 @@ import 'package:valura/features/data/models/product_form_model.dart';
 import 'package:valura/features/data/notifiers/add_item_notifier.dart';
 import 'package:valura/features/data/providers/add_item_provider.dart';
 import 'package:valura/features/data/providers/app_provider.dart';
-import 'package:valura/features/screens/main_screens/home_screen/home_screen.dart';
+import 'package:valura/features/screens/main_screens/add_item_screen/widgets/item_part_card.dart';
 import 'package:valura/helpers/popup_helpers.dart';
 import 'package:valura/packages/dropdown_search_package/dropdown_search_package.dart';
 import 'package:valura/packages/sqflite_package/sqflite_package.dart';
@@ -22,6 +20,8 @@ import 'package:valura/packages/sqflite_package/sqflite_queries.dart';
 import 'package:valura/packages/toast_package/toast_package.dart';
 import 'package:valura/utils/dependency_injection.dart';
 import 'package:valura/utils/size_constant.dart';
+import 'package:valura/widgets/custom_aligned_grid_view.dart';
+import 'package:valura/widgets/custom_appbar.dart';
 
 class AddItemScreen extends StatefulWidget {
   static const String id = '/add_item_screen';
@@ -53,6 +53,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
           ToastPackage.showSimpleToast(context: context, message: state.errorMessage);
         } else if (state is CreateProductSuccess) {
           ToastPackage.showSimpleToast(context: context, message: 'ذخیره شد');
+          context.read<AddItemProvider>().clearItems();
         }
       },
       builder: (context, state) {
@@ -171,79 +172,37 @@ class _AddItemScreenState extends State<AddItemScreen> {
                           child: Text('لیست خالی هست'),
                         );
                       }
-                      return AlignedGridView.count(
-                        padding: EdgeInsets.fromLTRB(
-                          sizeConstants.spacing16,
-                          sizeConstants.spacing12,
-                          sizeConstants.spacing16,
-                          sizeConstants.spacing20,
-                        ),
-                        physics: BouncingScrollPhysics(),
-                        itemCount: addedItems.length,
+                      return CustomAlignedGridView(
                         crossAxisCount: 1,
-                        crossAxisSpacing: sizeConstants.spacing12,
-                        mainAxisSpacing: sizeConstants.spacing12,
+                        length: addedItems.length,
                         itemBuilder: (context, index) {
                           final item = addedItems[index];
-                          return Card(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(sizeConstants.radiusMedium)),
-                            elevation: .6,
-                            shadowColor: Theme.of(context).shadowColor,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(sizeConstants.radiusMedium),
-                              child: Slidable(
-                                closeOnScroll: true,
-                                key: GlobalKey(),
-                                endActionPane: ActionPane(
-                                  motion: ScrollMotion(),
-                                  children: [
-                                    SlidableAction(
-                                      flex: 2,
-                                      onPressed: (context) {
-                                        try {} catch (_) {}
-                                      },
-                                      backgroundColor: kBlueColor,
-                                      foregroundColor: kWhiteColor,
-                                      icon: Icons.edit_note_rounded,
-                                      label: 'ویرایش',
-                                    ),
-                                    SlidableAction(
-                                      flex: 2,
-                                      onPressed: (slideContext) {
-                                        try {
-                                          PopupHelpers.showYesOrNoDialog(
-                                            context: context,
-                                            title: 'آیتم را حذف میکنید؟',
-                                            onYesTap: () {
-                                              try {
-                                                context.read<AddItemProvider>().removeItemAt(index);
-                                                context.pop();
-                                                setState(() {});
-                                              } catch (_) {}
-                                            },
-                                          );
-                                        } catch (_) {}
-                                      },
-                                      backgroundColor: kRedColor,
-                                      foregroundColor: kWhiteColor,
-                                      icon: Icons.delete,
-                                      label: 'حذف',
-                                    ),
-                                  ],
-                                ),
-                                child: ItemPartCard(
-                                  item: ItemModel(
-                                    id: item.id,
-                                    itemId: item.itemId,
-                                    purchaseRate: item.purchaseRate,
-                                    description: item.description,
-                                    name: item.name,
-                                    unitCost: item.unitCost,
-                                    landCost: item.landCost,
-                                    newRate: item.newRate,
-                                  ),
-                                ),
-                              ),
+                          return ItemPartCard(
+                            onDeleteTap: (slideContext) {
+                              try {
+                                PopupHelpers.showYesOrNoDialog(
+                                  context: context,
+                                  title: 'آیتم را حذف میکنید؟',
+                                  onYesTap: (bCtx) {
+                                    try {
+                                      context.read<AddItemProvider>().removeItemAt(index);
+                                      bCtx.pop();
+                                      setState(() {});
+                                    } catch (_) {}
+                                  },
+                                );
+                              } catch (_) {}
+                            },
+                            onEditTap: (context) {},
+                            item: ItemModel(
+                              id: item.id,
+                              itemId: item.itemId,
+                              purchaseRate: item.purchaseRate,
+                              description: item.description,
+                              name: item.name,
+                              unitCost: item.unitCost,
+                              landCost: item.landCost,
+                              newRate: item.newRate,
                             ),
                           );
                         },
@@ -289,20 +248,29 @@ class _AddItemScreenState extends State<AddItemScreen> {
 _submitProduct(BuildContext context) {
   try {
     List<ItemModel> items = context.read<AddItemProvider>().addedItems;
+    if (items.isEmpty) {
+      ToastPackage.showSimpleToast(context: context, message: 'حداقل یک جنس را باید انتخاب کنید.');
+      return;
+    }
     num total = context.read<AddItemProvider>().total;
+    List<int> itemIds = [];
     List<String> names = [];
     List<num> purchaseRates = [];
     List<num> landCosts = [];
     List<num> costs = [];
     List<num> newRates = [];
+    List<String?> descriptions = [];
     for (var item in items) {
+      itemIds.add(item.itemId);
       names.add(item.name);
       purchaseRates.add(item.purchaseRate);
       landCosts.add(item.landCost);
       costs.add(item.unitCost);
       newRates.add(item.newRate);
+      descriptions.add(item.description);
     }
     final product = ProductFormModel(
+      itemIds: itemIds,
       name: 'تولید',
       total: total,
       names: names,
@@ -310,183 +278,8 @@ _submitProduct(BuildContext context) {
       landCosts: landCosts,
       costs: costs,
       newRates: newRates,
+      descriptions: descriptions,
     );
     context.read<CreateItemBloc>().add(CreateProduct(product: product));
   } catch (_) {}
-}
-
-class BottomSheetItem extends StatelessWidget {
-  const BottomSheetItem({super.key, required this.title, required this.color, this.onTap, required this.icon, this.bottom = false});
-  final String title;
-  final Color color;
-  final Function()? onTap;
-  final IconData icon;
-  final bool bottom;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        InkWell(
-          onTap: onTap,
-          child: Container(
-            padding: EdgeInsets.all(sizeConstants.spacing12),
-            child: Row(
-              children: [
-                Icon(icon, color: color),
-                SizedBox(width: sizeConstants.spacing12),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: color),
-                ),
-              ],
-            ),
-          ),
-        ),
-        if (bottom) SizedBox(height: sizeConstants.spacing24),
-      ],
-    );
-  }
-}
-
-class ItemPartCard extends StatelessWidget {
-  const ItemPartCard({super.key, required this.item});
-  final ItemModel item;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: sizeConstants.spacing12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(sizeConstants.radiusMedium),
-        color: Theme.of(context).scaffoldBackgroundColor,
-        boxShadow: [
-          BoxShadow(
-            offset: Offset(0, 0),
-            color: Theme.of(context).brightness == Brightness.light ? kBlackColor12.withAlpha(20) : kGreyColor800.withAlpha(70),
-            blurRadius: 7,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: sizeConstants.spacing8, vertical: sizeConstants.spacing2),
-            decoration: BoxDecoration(
-              border: BoxBorder.fromLTRB(bottom: BorderSide(color: Theme.of(context).primaryColor.withAlpha(100))),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.list_alt, size: 18.r),
-                      SizedBox(width: sizeConstants.spacing4),
-                      Flexible(
-                        child: Text('جنس:', overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyLarge),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: sizeConstants.spacing8),
-                Flexible(child: Text(item.name, maxLines: 1)),
-              ],
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: sizeConstants.spacing12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.attach_money_rounded, size: 18.r),
-                      SizedBox(width: sizeConstants.spacing4),
-                      Flexible(
-                        child: Text('نرخ خرید:', overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyLarge),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: sizeConstants.spacing8),
-                Flexible(child: Text('${item.unitCost} ؋', maxLines: 1, textDirection: TextDirection.ltr)),
-              ],
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: sizeConstants.spacing12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.money_off, size: 18.r),
-                      SizedBox(width: sizeConstants.spacing4),
-                      Flexible(
-                        child: Text('مصرف:', overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyLarge),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: sizeConstants.spacing8),
-                Flexible(child: Text('${item.landCost} ؋', maxLines: 1, textDirection: TextDirection.ltr)),
-              ],
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: sizeConstants.spacing12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.payments_outlined, size: 18.r),
-                      SizedBox(width: sizeConstants.spacing4),
-                      Flexible(
-                        child: Text('تمام شد:', overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyLarge),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: sizeConstants.spacing8),
-                Flexible(child: Text('${item.unitCost} ؋', maxLines: 1, textDirection: TextDirection.ltr)),
-              ],
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: sizeConstants.spacing12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.receipt_long_outlined, size: 18.r),
-                      SizedBox(width: sizeConstants.spacing4),
-                      Flexible(
-                        child: Text('نرخ فروش:', overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyLarge),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: sizeConstants.spacing8),
-                Flexible(child: Text('${item.newRate} ؋', maxLines: 1, textDirection: TextDirection.ltr)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

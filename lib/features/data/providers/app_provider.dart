@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:valura/features/data/models/item_model.dart';
+import 'package:valura/utils/random_color.dart';
 
 class AppProvider extends ChangeNotifier {
   int _selectedIndex = 1;
@@ -21,5 +22,16 @@ class AppProvider extends ChangeNotifier {
         dropDownItems.insert(0, newItem); // Add new item at front
       }
     }
+  }
+
+  final Map<int, Color> _colorCache = {};
+
+  Color getStableColor(int index) {
+    if (_colorCache.containsKey(index)) {
+      return _colorCache[index]!;
+    }
+    final newColor = randomVibrantColorWithAlpha();
+    _colorCache[index] = newColor;
+    return newColor;
   }
 }

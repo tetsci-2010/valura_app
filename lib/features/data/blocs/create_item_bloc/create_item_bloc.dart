@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:valura/constants/exceptions.dart';
+import 'package:valura/features/data/blocs/home_bloc/home_bloc.dart';
 import 'package:valura/features/data/models/item_model.dart';
 import 'package:valura/features/data/models/product_form_model.dart';
 import 'package:valura/features/data/services/item_service.dart';
@@ -10,7 +11,8 @@ part 'create_item_state.dart';
 
 class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
   final ItemService itemService;
-  CreateItemBloc(this.itemService) : super(CreateItemInitial()) {
+  final HomeBloc homeBloc;
+  CreateItemBloc(this.itemService, this.homeBloc) : super(CreateItemInitial()) {
     on<CreateItem>(_onCreateItem);
     on<CreateProduct>(_onCreateProduct);
   }
@@ -31,6 +33,7 @@ class CreateItemBloc extends Bloc<CreateItemEvent, CreateItemState> {
     try {
       emit(CreatingProduct());
       final result = await itemService.storeProduct(event.product);
+      homeBloc.add(FetchProducts());
       emit(CreateProductSuccess(message: result));
     } on AppException catch (e) {
       emit(CreateProductFailure(errorMessage: e.errorMessage, statusCode: e.statusCode));

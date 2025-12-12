@@ -5,10 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:valura/constants/colors.dart';
 import 'package:valura/features/data/blocs/create_item_bloc/create_item_bloc.dart';
 import 'package:valura/features/data/models/item_model.dart';
-import 'package:valura/features/screens/main_screens/home_screen/home_screen.dart';
 import 'package:valura/helpers/number_formatters.dart';
 import 'package:valura/packages/toast_package/toast_package.dart';
 import 'package:valura/utils/size_constant.dart';
+import 'package:valura/widgets/custom_appbar.dart';
 
 class CreateItemScreen extends StatefulWidget {
   static const String id = '/create_item_screen';
@@ -61,7 +61,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
           child: BlocConsumer<CreateItemBloc, CreateItemState>(
             listener: (context, state) {
               if (state is CreateItemSuccess) {
-                ToastPackage.showSimpleToast(context: context,message: 'جنس ثبت شد');
+                ToastPackage.showSimpleToast(context: context, message: 'جنس ثبت شد');
                 nameController.clear();
                 unitCostController.clear();
                 purchaseRateController.clear();
@@ -70,7 +70,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
                 newRateController.clear();
                 descController.clear();
               } else if (state is CreateItemFailure) {
-                ToastPackage.showWarningToast(context: context,message: state.errorMessage);
+                ToastPackage.showWarningToast(context: context, message: state.errorMessage);
               }
             },
             builder: (context, state) {

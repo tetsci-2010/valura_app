@@ -3,6 +3,7 @@ import 'package:valura/features/screens/initial_screens/splash_screen.dart';
 import 'package:valura/features/screens/main_screens/create_item_screen/create_item_screen.dart';
 import 'package:valura/features/screens/main_screens/home_screen/home_screen.dart';
 import 'package:valura/features/screens/main_screens/main_home_screen/main_home_screen.dart';
+import 'package:valura/features/screens/main_screens/product_details_screen/product_details_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   debugLogDiagnostics: true,
@@ -27,6 +28,16 @@ final GoRouter appRouter = GoRouter(
       path: MainHomeScreen.id,
       name: MainHomeScreen.name,
       builder: (context, state) => MainHomeScreen(),
+    ),
+    GoRoute(
+      path: ProductDetailsScreen.id,
+      name: ProductDetailsScreen.name,
+      builder: (context, state) {
+        Map<String, dynamic> jsonData = state.extra as Map<String, dynamic>;
+        int productId = jsonData['product_id'] as int;
+        String productName = jsonData['product_name'] as String;
+        return ProductDetailsScreen(productId: productId, productName: productName);
+      },
     ),
   ],
 );

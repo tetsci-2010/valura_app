@@ -52,9 +52,6 @@ class MainHomeScreen extends StatelessWidget {
                     onTap: () {
                       try {
                         context.read<AppProvider>().updateSelectedScreen(index);
-                        if (index == 1) {
-                          context.read<HomeBloc>().add(FetchProducts());
-                        }
                       } catch (_) {}
                     },
                     child: AnimatedContainer(

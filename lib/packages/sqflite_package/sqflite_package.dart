@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -23,10 +25,7 @@ class SqflitePackage {
       path,
       version: 1,
       onCreate: _createTables, // 🔥 Runs the first time DB is created
-      onOpen: (db) async {
-        // await db.execute(createProductsTable);
-        // await db.execute(createProductDetailsTable);
-      },
+      onOpen: (db) async {},
     );
   }
 
@@ -68,6 +67,11 @@ class SqflitePackage {
       orderBy: orderBy,
       limit: limit,
     );
+  }
+
+  Future<List<Map<String, dynamic>>> rawQuery(String query) async {
+    final db = await instance;
+    return await db.rawQuery(query);
   }
 
   /// Update any row
@@ -140,19 +144,92 @@ class SqflitePackage {
     return {};
   }
 
+  /// Backup Function
+  Future<bool> backupDatabase() async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final dbPath = join(dir.path, dbName);
+      final backupPath = join(dir.path, dbBackupName);
+
+      final dbFile = File(dbPath);
+
+      if (await dbFile.exists()) {
+        await dbFile.copy(backupPath);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> restoreDatabase() async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final dbPath = join(dir.path, dbName);
+      final backupPath = join(dir.path, dbBackupName);
+
+      final backupFile = File(backupPath);
+
+      if (await backupFile.exists()) {
+        // Close DB first if opened
+        await _db?.close();
+        _db = null;
+
+        // Replace DB file
+        await backupFile.copy(dbPath);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
   /// ♻ Reset (Delete) the entire database and recreate it
   static Future<void> resetDatabase() async {
-    // Close DB if open
-    if (_db != null) {
-      await _db!.close();
-      _db = null;
+    try {
+      // 1) Close your in-memory DB reference if open
+      if (_db != null) {
+        try {
+          await _db!.close();
+        } catch (e) {
+          // ignore or log
+        }
+        _db = null;
+      }
+
+      // 2) Use sqflite's default DB folder (more reliable than applicationDocumentsDirectory)
+      final databasesPath = await getDatabasesPath();
+      final dbPath = join(databasesPath, dbName);
+
+      // 3) Ensure file exists then delete main DB and WAL/SHM files
+      final mainFile = File(dbPath);
+      final walFile = File('$dbPath-wal');
+      final shmFile = File('$dbPath-shm');
+
+      if (await mainFile.exists()) {
+        await deleteDatabase(dbPath); // preferred sqflite helper
+      } else {}
+
+      // delete wal and shm if present
+      if (await walFile.exists()) {
+        try {
+          await walFile.delete();
+        } catch (_) {}
+      }
+      if (await shmFile.exists()) {
+        try {
+          await shmFile.delete();
+        } catch (_) {}
+      }
+
+      // 4) Final existence check
+      // final existsNow = await mainFile.exists();
+      // print('DB exists after delete? $existsNow');
+    } catch (e) {
+      // print('resetDatabase failed: $e\n$st');
+      rethrow;
     }
-
-    // Find DB file path
-    final docsDir = await getApplicationDocumentsDirectory();
-    final dbPath = join(docsDir.path, dbName);
-
-    // Delete DB file
-    await deleteDatabase(dbPath);
   }
 }

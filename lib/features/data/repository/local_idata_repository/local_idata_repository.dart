@@ -1,4 +1,5 @@
 import 'package:valura/constants/exceptions.dart';
+import 'package:valura/features/data/enums/sort.dart';
 import 'package:valura/features/data/models/item_model.dart';
 import 'package:valura/features/data/models/product_form_model.dart';
 import 'package:valura/features/data/models/product_model.dart';
@@ -38,9 +39,33 @@ class LocalDataRepositoryImp implements ILocalDataRepository {
   }
 
   @override
-  Future<List<ProductModel>> fetchProducts() async {
+  Future<List<ProductModel>> fetchProducts({Sort? sort}) async {
     try {
-      final result = await localDataDataSource.fetchProducts();
+      final result = await localDataDataSource.fetchProducts(sort: sort);
+      return result;
+    } on AppException catch (_) {
+      rethrow;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<String> deleteProduct(int? id) async {
+    try {
+      final result = await localDataDataSource.deleteProduct(id);
+      return result;
+    } on AppException catch (_) {
+      rethrow;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<List<ItemModel>> fetchProductDetails(int id) async {
+    try {
+      final result = await localDataDataSource.fetchProductDetails(id);
       return result;
     } on AppException catch (_) {
       rethrow;

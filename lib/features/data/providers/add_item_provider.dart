@@ -15,6 +15,12 @@ class AddItemProvider extends ChangeNotifier {
     notifyListeners(); // single notify
   }
 
+  void clearItems(){
+    addedItems = [];
+    _recalculateTotal();
+    notifyListeners();
+  }
+
   // Remove item (reassign list reference after removal)
   void removeItemAt(int index) {
     if (index < 0 || index >= addedItems.length) return;

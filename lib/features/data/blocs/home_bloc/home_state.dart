@@ -27,3 +27,22 @@ final class FetchProductsFailure extends HomeState {
   @override
   List<Object?> get props => [errorMessage, statusCode];
 }
+
+final class DeletingProduct extends HomeState {}
+
+final class DeleteProductSuccess extends HomeState {
+  final String message;
+
+  const DeleteProductSuccess({required this.message});
+  @override
+  List<Object?> get props => [message];
+}
+
+final class DeleteProductFailure extends HomeState {
+  final String errorMessage;
+  final String? statusCode;
+
+  const DeleteProductFailure({required this.errorMessage, this.statusCode});
+  @override
+  List<Object?> get props => [errorMessage, statusCode];
+}

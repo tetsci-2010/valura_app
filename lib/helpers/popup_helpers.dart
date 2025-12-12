@@ -45,7 +45,12 @@ class PopupHelpers {
     );
   }
 
-  static void showYesOrNoDialog({required BuildContext context, required String title, Function()? onNoTap, Function()? onYesTap}) {
+  static void showYesOrNoDialog({
+    required BuildContext context,
+    required String title,
+    Function()? onNoTap,
+    Function(BuildContext bCtx)? onYesTap,
+  }) {
     showDialog(
       context: context,
       builder: (context) {
@@ -60,7 +65,7 @@ class PopupHelpers {
               children: [
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.bold),
                   textAlign: TextAlign.start,
                 ),
                 SizedBox(height: sizeConstants.spacing56),
@@ -92,7 +97,11 @@ class PopupHelpers {
                     ),
                     Flexible(
                       child: GestureDetector(
-                        onTap: onYesTap,
+                        onTap: () {
+                          if (onYesTap != null) {
+                            onYesTap(context);
+                          }
+                        },
                         child: Center(
                           child: Text(
                             'بله',

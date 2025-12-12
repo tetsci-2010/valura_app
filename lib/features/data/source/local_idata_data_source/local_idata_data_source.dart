@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:valura/constants/exceptions.dart';
+import 'package:valura/features/data/enums/sort.dart';
 import 'package:valura/features/data/models/item_model.dart';
 import 'package:valura/features/data/models/product_form_model.dart';
 import 'package:valura/features/data/models/product_model.dart';
@@ -10,7 +11,9 @@ import 'package:valura/packages/sqflite_package/sqflite_queries.dart';
 abstract class ILocalDataDataSource {
   Future<String> storeItem(ItemModel itemModel);
   Future<String> storeProduct(ProductFormModel product);
-  Future<List<ProductModel>> fetchProducts();
+  Future<List<ProductModel>> fetchProducts({Sort? sort});
+  Future<String> deleteProduct(int? id);
+  Future<List<ItemModel>> fetchProductDetails(int id);
 }
 
 class LocalDataDataSourceImp implements ILocalDataDataSource {
@@ -41,110 +44,189 @@ class LocalDataDataSourceImp implements ILocalDataDataSource {
     } on DatabaseException catch (e) {
       final msg = e.toString();
       if (e.isOpenFailedError()) {
-        throw AppException(SqfliteCodes.dbOpenFailed, '1105');
+        throw AppException(msg, SqfliteCodes.dbOpenFailed);
       } else if (e.isSyntaxError()) {
-        throw AppException(SqfliteCodes.sqlSyntaxError, '1103');
+        throw AppException(msg, SqfliteCodes.sqlSyntaxError);
       } else if (e.isNoSuchTableError()) {
-        throw AppException(SqfliteCodes.tableNotFound, '1102');
+        throw AppException(msg, SqfliteCodes.tableNotFound);
       } else if (e.isDatabaseClosedError()) {
-        throw AppException(SqfliteCodes.dbClosed, '1104');
+        throw AppException(msg, SqfliteCodes.dbClosed);
       } else if (msg.contains("UNIQUE constraint failed")) {
-        throw AppException(SqfliteCodes.uniqueConstraintFailed, '1100');
+        throw AppException(msg, SqfliteCodes.uniqueConstraintFailed);
       } else if (msg.contains("foreign key constraint")) {
-        throw AppException(SqfliteCodes.foreignKeyConstraintFailed, '1101');
+        throw AppException(msg, SqfliteCodes.foreignKeyConstraintFailed);
       } else {
-        throw AppException(SqfliteCodes.databaseException, '1000');
+        throw AppException(msg, SqfliteCodes.databaseException);
       }
     } catch (e) {
-      throw AppException(SqfliteCodes.unknowDatabaseError, '1999');
+      throw AppException(e.toString(), '500');
     }
   }
 
   @override
   Future<String> storeProduct(ProductFormModel product) async {
     try {
-      for (var i = 0; i < product.names.length; i++) {
-        await (await SqflitePackage.instance).transaction(
-          (txn) async {
-            final index = await txn.insert(
-              productsTable,
-              {
-                'name': product.name,
-                'total': product.total,
-              },
-              conflictAlgorithm: ConflictAlgorithm.replace,
-            );
+      await (await SqflitePackage.instance).transaction(
+        (txn) async {
+          final last = await txn.rawQuery('SELECT id FROM $productsTable ORDER BY id DESC LIMIT 1');
+
+          int itemId = last.isNotEmpty ? (last.first['id'] as int) + 1 : 1;
+          int index = await txn.insert(
+            productsTable,
+            {
+              'name': '${product.name} $itemId',
+              'total': product.total,
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+          for (var i = 0; i < product.names.length; i++) {
             await txn.insert(
               productDetailsTable,
               {
                 'product_id': index,
+                'item_id': product.itemIds[i],
                 'name': product.names[i],
                 'purchase_rate': product.purchaseRates[i],
                 'land_cost': product.landCosts[i],
-                'cost': product.costs[i],
+                'unit_cost': product.costs[i],
                 'new_rate': product.newRates[i],
+                'description': product.descriptions[i],
               },
               conflictAlgorithm: ConflictAlgorithm.replace,
             );
-          },
-        );
-      }
+          }
+        },
+      );
       return SqfliteCodes.successCode;
     } on DatabaseException catch (e) {
       final msg = e.toString();
       if (e.isOpenFailedError()) {
-        throw AppException(SqfliteCodes.dbOpenFailed, '1105');
+        throw AppException(msg, SqfliteCodes.dbOpenFailed);
       } else if (e.isSyntaxError()) {
-        throw AppException(SqfliteCodes.sqlSyntaxError, '1103');
+        throw AppException(msg, SqfliteCodes.sqlSyntaxError);
       } else if (e.isNoSuchTableError()) {
-        throw AppException(SqfliteCodes.tableNotFound, '1102');
+        throw AppException(msg, SqfliteCodes.tableNotFound);
       } else if (e.isDatabaseClosedError()) {
-        throw AppException(SqfliteCodes.dbClosed, '1104');
+        throw AppException(msg, SqfliteCodes.dbClosed);
       } else if (msg.contains("UNIQUE constraint failed")) {
-        throw AppException(SqfliteCodes.uniqueConstraintFailed, '1100');
+        throw AppException(msg, SqfliteCodes.uniqueConstraintFailed);
       } else if (msg.contains("foreign key constraint")) {
-        throw AppException(SqfliteCodes.foreignKeyConstraintFailed, '1101');
+        throw AppException(msg, SqfliteCodes.foreignKeyConstraintFailed);
       } else {
-        throw AppException(SqfliteCodes.databaseException, '1000');
+        throw AppException(msg, SqfliteCodes.databaseException);
       }
     } catch (e) {
-      throw AppException(SqfliteCodes.unknowDatabaseError, '1999');
+      throw AppException(e.toString(), '500');
     }
   }
 
   @override
-  Future<List<ProductModel>> fetchProducts() async {
+  Future<List<ProductModel>> fetchProducts({Sort? sort}) async {
     try {
       SqflitePackage db = SqflitePackage();
-      List<Map<String, dynamic>> products = await db.query(table: productsTable);
+      String sortt = sort?.getName ?? Sort.descending.getName;
+      List<Map<String, dynamic>> products = await db.rawQuery('SELECT * FROM $productsTable ORDER BY id $sortt');
       List<ProductModel> pProducts = [];
       for (var product in products) {
-        List<Map<String, dynamic>> items = await db.query(table: productDetailsTable);
-        print(items);
-        return [];
+        List<Map<String, dynamic>> items = await db.query(
+          table: productDetailsTable,
+          where: 'product_id = ?',
+          whereArgs: [product['id']],
+        );
         List<ItemModel> pItems = items.map((e) => ItemModel.fromDB(e)).toList();
-        pProducts.add(ProductModel(id: product['id'], name: product['name'], total: product['total'], items: pItems));
+        // items.forEach((element) => print(element));
+        // return [];
+        pProducts.add(
+          ProductModel(id: product['id'], name: product['name'], total: product['total'], items: pItems),
+        );
       }
       return pProducts;
     } on DatabaseException catch (e) {
       final msg = e.toString();
       if (e.isOpenFailedError()) {
-        throw AppException(SqfliteCodes.dbOpenFailed, '1105');
+        throw AppException(msg, SqfliteCodes.dbOpenFailed);
       } else if (e.isSyntaxError()) {
-        throw AppException(SqfliteCodes.sqlSyntaxError, '1103');
+        throw AppException(msg, SqfliteCodes.sqlSyntaxError);
       } else if (e.isNoSuchTableError()) {
-        throw AppException(SqfliteCodes.tableNotFound, '1102');
+        throw AppException(msg, SqfliteCodes.tableNotFound);
       } else if (e.isDatabaseClosedError()) {
-        throw AppException(SqfliteCodes.dbClosed, '1104');
+        throw AppException(msg, SqfliteCodes.dbClosed);
       } else if (msg.contains("UNIQUE constraint failed")) {
-        throw AppException(SqfliteCodes.uniqueConstraintFailed, '1100');
+        throw AppException(msg, SqfliteCodes.uniqueConstraintFailed);
       } else if (msg.contains("foreign key constraint")) {
-        throw AppException(SqfliteCodes.foreignKeyConstraintFailed, '1101');
+        throw AppException(msg, SqfliteCodes.foreignKeyConstraintFailed);
       } else {
-        throw AppException(SqfliteCodes.databaseException, '1000');
+        throw AppException(msg, SqfliteCodes.databaseException);
       }
     } catch (e) {
-      throw AppException(e.toString(), '1999');
+      throw AppException(e.toString(), '500');
+    }
+  }
+
+  @override
+  Future<String> deleteProduct(int? id) async {
+    try {
+      if (id != null) {
+        await (await SqflitePackage.instance).transaction((txn) async {
+          await txn.delete(productDetailsTable, where: 'product_id = ?', whereArgs: [id]);
+          await txn.delete(productsTable, where: 'id = ?', whereArgs: [id]);
+        });
+      } else {
+        await (await SqflitePackage.instance).transaction((txn) async {
+          await txn.delete(productDetailsTable);
+          await txn.delete(productsTable);
+        });
+      }
+
+      return SqfliteCodes.successCode;
+    } on DatabaseException catch (e) {
+      final msg = e.toString();
+      if (e.isOpenFailedError()) {
+        throw AppException(msg, SqfliteCodes.dbOpenFailed);
+      } else if (e.isSyntaxError()) {
+        throw AppException(msg, SqfliteCodes.sqlSyntaxError);
+      } else if (e.isNoSuchTableError()) {
+        throw AppException(msg, SqfliteCodes.tableNotFound);
+      } else if (e.isDatabaseClosedError()) {
+        throw AppException(msg, SqfliteCodes.dbClosed);
+      } else if (msg.contains("UNIQUE constraint failed")) {
+        throw AppException(msg, SqfliteCodes.uniqueConstraintFailed);
+      } else if (msg.contains("foreign key constraint")) {
+        throw AppException(msg, SqfliteCodes.foreignKeyConstraintFailed);
+      } else {
+        throw AppException(msg, SqfliteCodes.databaseException);
+      }
+    } catch (e) {
+      throw AppException(e.toString(), '500');
+    }
+  }
+
+  @override
+  Future<List<ItemModel>> fetchProductDetails(int id) async {
+    try {
+      SqflitePackage db = SqflitePackage();
+      List<Map<String, dynamic>> items = await db.query(table: productDetailsTable, where: 'product_id = ?', whereArgs: [id]);
+      List<ItemModel> pItems = items.map((e) => ItemModel.fromDB(e)).toList();
+      return pItems;
+    } on DatabaseException catch (e) {
+      final msg = e.toString();
+      if (e.isOpenFailedError()) {
+        throw AppException(msg, SqfliteCodes.dbOpenFailed);
+      } else if (e.isSyntaxError()) {
+        throw AppException(msg, SqfliteCodes.sqlSyntaxError);
+      } else if (e.isNoSuchTableError()) {
+        throw AppException(msg, SqfliteCodes.tableNotFound);
+      } else if (e.isDatabaseClosedError()) {
+        throw AppException(msg, SqfliteCodes.dbClosed);
+      } else if (msg.contains("UNIQUE constraint failed")) {
+        throw AppException(msg, SqfliteCodes.uniqueConstraintFailed);
+      } else if (msg.contains("foreign key constraint")) {
+        throw AppException(msg, SqfliteCodes.foreignKeyConstraintFailed);
+      } else {
+        throw AppException(msg, SqfliteCodes.databaseException);
+      }
+    } catch (e) {
+      throw AppException(e.toString(), '500');
     }
   }
 }
