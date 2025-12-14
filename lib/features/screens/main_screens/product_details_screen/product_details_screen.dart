@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:valura/features/data/blocs/product_details_bloc/product_details_bloc.dart';
 import 'package:valura/features/data/models/item_model.dart';
 import 'package:valura/features/screens/main_screens/add_item_screen/widgets/item_part_card.dart';
+import 'package:valura/features/screens/main_screens/edit_item_screen/edit_item_screen.dart';
+import 'package:valura/helpers/popup_helpers.dart';
 import 'package:valura/packages/toast_package/toast_package.dart';
 import 'package:valura/utils/size_constant.dart';
 import 'package:valura/widgets/custom_aligned_grid_view.dart';
 import 'package:valura/widgets/custom_appbar.dart';
+import 'package:valura/widgets/loading_cover.dart';
 import 'package:valura/widgets/try_again_btn.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
@@ -47,14 +51,38 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
                 } else if (state is FetchProductDetailsSuccess) {
                   List<ItemModel> items = state.details;
-                  return CustomAlignedGridView(
-                    paddings: EdgeInsets.symmetric(horizontal: sizeConstants.spacing8, vertical: sizeConstants.spacing12),
-                    itemBuilder: (context, index) {
-                      ItemModel item = items[index];
-                      return ItemPartCard(item: item);
-                    },
-                    length: items.length,
-                    crossAxisCount: 1,
+                  return Stack(
+                    children: [
+                      CustomAlignedGridView(
+                        paddings: EdgeInsets.symmetric(horizontal: sizeConstants.spacing8, vertical: sizeConstants.spacing12),
+                        itemBuilder: (context, index) {
+                          ItemModel item = items[index];
+                          return ItemPartCard(
+                            item: item,
+                            onEditTap: (context) {
+                              try {
+                                context.push(EditItemScreen.id, extra: {'item_id': item.id});
+                              } catch (_) {}
+                            },
+                            onDeleteTap: (mContext) {
+                              try {
+                                PopupHelpers.showYesOrNoDialog(
+                                  context: context,
+                                  title: 'جزئیات انتخاب شده را حذف میکنید؟',
+                                  onYesTap: (bCtx) {
+                                    context.read<ProductDetailsBloc>().add(DeleteProductDetail(id: item.id, pId: widget.productId));
+                                    bCtx.pop();
+                                  },
+                                );
+                              } catch (_) {}
+                            },
+                          );
+                        },
+                        length: items.length,
+                        crossAxisCount: 1,
+                      ),
+                      if (state is DeletingProductDetail) Positioned.fill(child: LoadingCover()),
+                    ],
                   );
                 } else {
                   return Center(

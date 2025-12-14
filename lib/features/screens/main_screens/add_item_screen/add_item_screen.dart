@@ -13,6 +13,7 @@ import 'package:valura/features/data/notifiers/add_item_notifier.dart';
 import 'package:valura/features/data/providers/add_item_provider.dart';
 import 'package:valura/features/data/providers/app_provider.dart';
 import 'package:valura/features/screens/main_screens/add_item_screen/widgets/item_part_card.dart';
+import 'package:valura/features/screens/main_screens/edit_item_screen/edit_item_screen.dart';
 import 'package:valura/helpers/popup_helpers.dart';
 import 'package:valura/packages/dropdown_search_package/dropdown_search_package.dart';
 import 'package:valura/packages/sqflite_package/sqflite_package.dart';
@@ -22,6 +23,7 @@ import 'package:valura/utils/dependency_injection.dart';
 import 'package:valura/utils/size_constant.dart';
 import 'package:valura/widgets/custom_aligned_grid_view.dart';
 import 'package:valura/widgets/custom_appbar.dart';
+import 'package:valura/widgets/loading_cover.dart';
 
 class AddItemScreen extends StatefulWidget {
   static const String id = '/add_item_screen';
@@ -193,7 +195,11 @@ class _AddItemScreenState extends State<AddItemScreen> {
                                 );
                               } catch (_) {}
                             },
-                            onEditTap: (context) {},
+                            onEditTap: (context) {
+                              try {
+                                context.push(EditItemScreen.id, extra: {'item_model': item});
+                              } catch (_) {}
+                            },
                             item: ItemModel(
                               id: item.id,
                               itemId: item.itemId,
@@ -214,29 +220,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
             ),
             if (state is CreatingProduct)
               Positioned.fill(
-                child: Container(
-                  color: kGreyColor200.withAlpha(150),
-                  child: Center(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: sizeConstants.spacing12, vertical: sizeConstants.spacing8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(sizeConstants.radiusMedium),
-                        color: Theme.of(context).brightness == Brightness.light ? kGreyColor300 : kBlackColor,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CupertinoActivityIndicator(radius: 8.r),
-                          SizedBox(width: sizeConstants.spacing8),
-                          Text(
-                            'در حال بارگیری...',
-                            style: Theme.of(context).textTheme.labelLarge,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                child: LoadingCover(),
               ),
           ],
         );

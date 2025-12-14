@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 import 'package:valura/features/data/blocs/create_item_bloc/create_item_bloc.dart';
+import 'package:valura/features/data/blocs/edit_item_bloc/edit_item_bloc.dart';
 import 'package:valura/features/data/blocs/home_bloc/home_bloc.dart';
 import 'package:valura/features/data/blocs/localization_bloc/localization_bloc.dart';
 import 'package:valura/features/data/blocs/product_details_bloc/product_details_bloc.dart';
@@ -26,7 +27,7 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  await SqflitePackage.resetDatabase();
+  // await SqflitePackage.resetDatabase();
   await SqflitePackage.instance;
   runApp(
     MultiProvider(
@@ -53,6 +54,7 @@ class MyApp extends StatelessWidget {
           BlocProvider(create: (context) => di<CreateItemBloc>()),
           BlocProvider(create: (context) => di<HomeBloc>()),
           BlocProvider(create: (context) => di<ProductDetailsBloc>()),
+          BlocProvider(create: (context) => di<EditItemBloc>()),
         ],
         child: ScreenUtilInit(
           designSize: Size(392.72727272727275, 856.7272727272727),

@@ -28,3 +28,23 @@ final class FetchProductDetailsSuccess extends ProductDetailsState {
   @override
   List<Object?> get props => [details];
 }
+
+final class DeletingProductDetail extends ProductDetailsState {}
+
+final class DeleteProductDetailSuccess extends ProductDetailsState {
+  final String message;
+
+  const DeleteProductDetailSuccess({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+final class DeleteProductDetailFailure extends ProductDetailsState {
+  final String errorMessage;
+  final String? statusCode;
+
+  const DeleteProductDetailFailure({required this.errorMessage, this.statusCode});
+  @override
+  List<Object?> get props => [errorMessage, statusCode];
+}

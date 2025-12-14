@@ -87,7 +87,7 @@ class ItemPartCard extends StatelessWidget {
                           ),
                         ),
                         SizedBox(width: sizeConstants.spacing8),
-                        Flexible(child: Text(item.name, maxLines: 1)),
+                        Flexible(flex: 3, child: Text(item.name, maxLines: 2, style: Theme.of(context).textTheme.titleSmall)),
                       ],
                     ),
                   ),
@@ -184,6 +184,7 @@ class ItemPartCard extends StatelessWidget {
                       padding: EdgeInsets.symmetric(horizontal: sizeConstants.spacing12),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Row(
@@ -197,7 +198,13 @@ class ItemPartCard extends StatelessWidget {
                             ],
                           ),
                           SizedBox(height: sizeConstants.spacing2),
-                          Flexible(child: Text(item.description!, maxLines: 1, textDirection: TextDirection.ltr)),
+                          Flexible(
+                            child: Text(
+                              item.description!,
+                              maxLines: 10,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
                         ],
                       ),
                     ),

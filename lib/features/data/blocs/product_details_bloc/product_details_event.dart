@@ -15,3 +15,13 @@ final class FetchProductDetails extends ProductDetailsEvent {
   @override
   List<Object?> get props => [id];
 }
+
+final class DeleteProductDetail extends ProductDetailsEvent {
+  final int id;
+  final int pId;
+
+  const DeleteProductDetail({required this.id, required this.pId});
+
+  @override
+  List<Object?> get props => [id, pId];
+}

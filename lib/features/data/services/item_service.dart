@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:valura/constants/exceptions.dart';
 import 'package:valura/features/data/enums/sort.dart';
 import 'package:valura/features/data/models/item_model.dart';
@@ -57,6 +59,28 @@ class ItemService {
   Future<List<ItemModel>> fetchProductDetails(int id) async {
     try {
       final result = await localDataRepositoryImp.fetchProductDetails(id);
+      return result;
+    } on AppException catch (_) {
+      rethrow;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  Future<ItemModel?> editProductDetails(int id) async {
+    try {
+      final result = await localDataRepositoryImp.editProductDetails(id);
+      return result;
+    } on AppException catch (_) {
+      rethrow;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  Future<String> deleteProductDetail({required int id, required int pId}) async {
+    try {
+      final result = await localDataRepositoryImp.deleteProductDetail(id: id, pId: pid);
       return result;
     } on AppException catch (_) {
       rethrow;

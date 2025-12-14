@@ -73,4 +73,28 @@ class LocalDataRepositoryImp implements ILocalDataRepository {
       throw AppException(e.toString());
     }
   }
+
+  @override
+  Future<ItemModel?> editProductDetails(int id) async {
+    try {
+      final result = await localDataDataSource.editProductDetails(id);
+      return result;
+    } on AppException catch (_) {
+      rethrow;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<String> deleteProductDetail({required int id, required int pId}) async {
+    try {
+      final result = await localDataDataSource.deleteProductDetail(id: id, pId: pId);
+      return result;
+    } on AppException catch (_) {
+      rethrow;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
 }

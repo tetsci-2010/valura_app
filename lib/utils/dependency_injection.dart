@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:valura/features/data/blocs/create_item_bloc/create_item_bloc.dart';
+import 'package:valura/features/data/blocs/edit_item_bloc/edit_item_bloc.dart';
 import 'package:valura/features/data/blocs/home_bloc/home_bloc.dart';
 import 'package:valura/features/data/blocs/localization_bloc/localization_bloc.dart';
 import 'package:valura/features/data/blocs/product_details_bloc/product_details_bloc.dart';
@@ -38,4 +39,7 @@ Future<void> setupDI() async {
 
   ///
   di.registerLazySingleton(() => ProductDetailsBloc(di()));
+
+  ///
+  di.registerLazySingleton(() => EditItemBloc(di()));
 }
