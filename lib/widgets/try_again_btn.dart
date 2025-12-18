@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:valura/constants/colors.dart';
 
 class TryAgainBtn extends StatelessWidget {
   const TryAgainBtn({super.key, this.onTryAgain});
@@ -13,7 +14,7 @@ class TryAgainBtn extends StatelessWidget {
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(1000),
-          border: Border.all(),
+          border: Border.all(color: Theme.of(context).textTheme.bodyLarge?.color ?? kGreyColor),
         ),
         child: Icon(Icons.refresh_rounded),
       ),

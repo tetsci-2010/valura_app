@@ -1,8 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:valura/constants/colors.dart';
@@ -16,6 +13,7 @@ import 'package:valura/features/screens/main_screens/add_item_screen/widgets/ite
 import 'package:valura/features/screens/main_screens/edit_item_screen/edit_item_screen.dart';
 import 'package:valura/helpers/popup_helpers.dart';
 import 'package:valura/packages/dropdown_search_package/dropdown_search_package.dart';
+import 'package:valura/packages/sqflite_package/sqflite_codes.dart';
 import 'package:valura/packages/sqflite_package/sqflite_package.dart';
 import 'package:valura/packages/sqflite_package/sqflite_queries.dart';
 import 'package:valura/packages/toast_package/toast_package.dart';
@@ -52,7 +50,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     return BlocConsumer<CreateItemBloc, CreateItemState>(
       listener: (context, state) {
         if (state is CreateProductFailure) {
-          ToastPackage.showSimpleToast(context: context, message: state.errorMessage);
+          ToastPackage.showSimpleToast(context: context, message: getErrorMessage(state.errorMessage));
         } else if (state is CreateProductSuccess) {
           ToastPackage.showSimpleToast(context: context, message: 'ذخیره شد');
           context.read<AddItemProvider>().clearItems();

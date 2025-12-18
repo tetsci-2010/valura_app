@@ -18,15 +18,22 @@ class SqflitePackage {
 
   // 📍 Create the database file
   static Future<Database> _initDB() async {
-    final dbPath = await getDatabasesPath(); // 🗂 where databases are saved
-    final path = join(dbPath, dbName); // 📌 our custom file name
+    final dbPath = await getApplicationDocumentsDirectory(); // 🗂 where databases are saved
+    final path = join(dbPath.path, dbName); // 📌 our custom file name
 
     return await openDatabase(
       path,
       version: 1,
       onCreate: _createTables, // 🔥 Runs the first time DB is created
-      onOpen: (db) async {},
+      onOpen: (db) async {
+        // await db.execute('DROP TABLE IF EXISTS $backupsTable');
+        // await db.execute(createBackupsTable);
+      },
     );
+  }
+
+  static void resetDB() {
+    _db = null;
   }
 
   // 🏗 Define your tables here
@@ -34,6 +41,7 @@ class SqflitePackage {
     await db.execute(createItemsTable);
     await db.execute(createProductsTable);
     await db.execute(createProductDetailsTable);
+    await db.execute(createBackupsTable);
   }
 
   /* =========================

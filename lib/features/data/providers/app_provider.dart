@@ -3,7 +3,7 @@ import 'package:valura/features/data/models/item_model.dart';
 import 'package:valura/utils/random_color.dart';
 
 class AppProvider extends ChangeNotifier {
-  int _selectedIndex = 1;
+  int _selectedIndex = 0;
   int get getSelectedScreen => _selectedIndex;
   void updateSelectedScreen(int index) {
     _selectedIndex = index;
@@ -22,6 +22,11 @@ class AppProvider extends ChangeNotifier {
         dropDownItems.insert(0, newItem); // Add new item at front
       }
     }
+  }
+
+  void clearDropDownItems() {
+    dropDownItems = [];
+    notifyListeners();
   }
 
   final Map<int, Color> _colorCache = {};

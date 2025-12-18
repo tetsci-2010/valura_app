@@ -11,12 +11,14 @@ class AppTheme {
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         },
       ),
-      fontFamily: 'BYekan',
+      fontFamily: 'Sahel',
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: kPrimaryColor,
         foregroundColor: kWhiteColor,
       ),
       appBarTheme: AppBarTheme(backgroundColor: kPrimaryColor, foregroundColor: kWhiteColor),
+      cardTheme: CardThemeData(color: kGreyColor200),
+      scaffoldBackgroundColor: kWhiteColor,
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: kPrimaryColor,
         linearTrackColor: kWarningTrackColor,
@@ -77,7 +79,7 @@ class AppTheme {
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         },
       ),
-      fontFamily: 'BYekan',
+      fontFamily: 'Sahel',
       typography: Typography.material2021(),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: kPrimaryColor,
@@ -88,6 +90,9 @@ class AppTheme {
         style: MenuStyle(backgroundColor: WidgetStatePropertyAll(Theme.of(context).scaffoldBackgroundColor)),
       ),
       appBarTheme: AppBarTheme(backgroundColor: kPrimaryColor, foregroundColor: kWhiteColor),
+      cardTheme: CardThemeData(color: cardColor),
+
+      scaffoldBackgroundColor: cardColor,
       datePickerTheme: DatePickerThemeData(locale: Locale('fa')),
       primaryColor: kPrimaryColor,
       shadowColor: darkBoxShadowColor,
@@ -167,7 +172,7 @@ TextTheme getLightTextTheme() {
     ),
     bodyLarge: TextStyle(
       fontSize: sizeConstants.fontBodyLarge,
-      color: kBlackColor87,
+      color: kPrimaryColor,
     ),
     bodyMedium: TextStyle(
       fontSize: sizeConstants.fontBodyMedium,

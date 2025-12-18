@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:valura/constants/colors.dart';
@@ -11,10 +10,12 @@ import 'package:valura/features/data/enums/sort.dart';
 import 'package:valura/features/data/models/product_model.dart';
 import 'package:valura/features/data/providers/app_provider.dart';
 import 'package:valura/features/data/providers/home_provider.dart';
+import 'package:valura/features/screens/main_screens/backup_screen/backup_screen.dart';
 import 'package:valura/features/screens/main_screens/home_screen/widgets/home_product_model_card.dart';
 import 'package:valura/features/screens/main_screens/product_details_screen/product_details_screen.dart';
 import 'package:valura/helpers/bottom_sheet_helper.dart';
 import 'package:valura/helpers/popup_helpers.dart';
+import 'package:valura/packages/sqflite_package/sqflite_codes.dart';
 import 'package:valura/packages/toast_package/toast_package.dart';
 import 'package:valura/utils/size_constant.dart';
 import 'package:valura/widgets/bottom_sheet_item.dart';
@@ -36,10 +37,28 @@ class HomeScreen extends StatelessWidget {
           CustomAppbar(
             child: Row(
               children: [
-                CircleAvatar(
-                  maxRadius: sizeConstants.avatarSmall,
-                  minRadius: sizeConstants.avatarSmall,
-                  backgroundImage: AssetImage(ImagesPaths.valuraTextJpg),
+                InkWell(
+                  borderRadius: BorderRadius.circular(1000),
+                  onTap: () {
+                    try {
+                      context.push(BackupScreen.id);
+                    } catch (_) {}
+                  },
+                  child: Hero(
+                    tag: 'image',
+                    child: Container(
+                      padding: EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: kWhiteColor),
+                        borderRadius: BorderRadius.circular(1000),
+                      ),
+                      child: CircleAvatar(
+                        maxRadius: sizeConstants.avatarSmall,
+                        minRadius: sizeConstants.avatarSmall,
+                        backgroundImage: AssetImage(ImagesPaths.valuraTextJpg),
+                      ),
+                    ),
+                  ),
                 ),
                 SizedBox(width: sizeConstants.spacing12),
                 Column(
@@ -67,7 +86,7 @@ class HomeScreen extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      'به والورا خوش آمدی!',
+                      'به والورا خوش آمدید!',
                       style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: kWhiteColor),
                     ),
                   ],
@@ -78,20 +97,33 @@ class HomeScreen extends StatelessWidget {
           BlocConsumer<HomeBloc, HomeState>(
             listener: (context, state) {
               if (state is FetchProductsFailure) {
-                ToastPackage.showSimpleToast(context: context, message: state.errorMessage);
+                ToastPackage.showSimpleToast(context: context, message: getErrorMessage(state.errorMessage));
               }
             },
             builder: (context, state) {
               if (state is FetchingProducts) {
                 return Expanded(
-                  child: CircularProgressIndicator(color: Theme.of(context).primaryColor),
+                  child: Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
                 );
               } else if (state is FetchProductsSuccess) {
                 List<ProductModel> products = state.products;
                 if (products.isEmpty) {
                   return Expanded(
                     child: Center(
-                      child: Text('هیج تولیدی موجود نیست.'),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('هیج تولیدی موجود نیست.'),
+                          SizedBox(height: sizeConstants.spacing16),
+                          TryAgainBtn(
+                            onTryAgain: () {
+                              try {
+                                context.read<HomeBloc>().add(FetchProducts());
+                              } catch (_) {}
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 } else {
@@ -183,70 +215,83 @@ class HomeScreen extends StatelessWidget {
                           child: Selector<HomeProvider, int>(
                             selector: (context, homeProvider) => homeProvider.homeBuilderLayout,
                             builder: (context, layout, child) {
-                              return CustomAlignedGridView(
-                                itemBuilder: (builderContext, index) {
-                                  ProductModel product = products[index];
-                                  return GestureDetector(
-                                    onTap: () {
-                                      try {
-                                        BottomSheetHelper.showBottomSheet(
-                                          context: builderContext,
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              BottomSheetItem(
-                                                title: 'ویرایش',
-                                                color: kGreenColor,
-                                                icon: Icons.edit_note_rounded,
-                                                onTap: () {},
-                                              ),
-                                              BottomSheetItem(
-                                                title: 'حذف',
-                                                color: kRedColor,
-                                                icon: Icons.delete,
-                                                onTap: () {
-                                                  try {
-                                                    PopupHelpers.showYesOrNoDialog(
-                                                      context: context,
-                                                      title: '"${product.name}" را حذف میکنید؟',
-                                                      onYesTap: (bCtx) {
-                                                        bCtx.pop();
-                                                        builderContext.pop();
-                                                        context.read<HomeBloc>().add(DeleteProduct(id: product.id));
-                                                      },
-                                                    );
-                                                  } catch (_) {}
-                                                },
-                                              ),
-                                              BottomSheetItem(
-                                                title: 'جزئیات',
-                                                color: kBlueColor,
-                                                icon: Icons.info_outline_rounded,
-                                                bottom: true,
-                                                onTap: () {
-                                                  try {
-                                                    context.pop();
-                                                    context.push(
-                                                      ProductDetailsScreen.id,
-                                                      extra: {'product_id': product.id, 'product_name': product.name},
-                                                    );
-                                                  } catch (_) {}
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      } catch (_) {}
-                                    },
-                                    child: HomeProductModelCard(
-                                      name: product.name,
-                                      total: product.total,
-                                      color: context.read<AppProvider>().getStableColor(index),
-                                    ),
-                                  );
+                              return RefreshIndicator(
+                                triggerMode: RefreshIndicatorTriggerMode.anywhere,
+                                onRefresh: () async {
+                                  try {
+                                    context.read<HomeBloc>().add(FetchProducts());
+                                  } catch (_) {}
                                 },
-                                length: products.length,
-                                crossAxisCount: layout,
+                                child: CustomAlignedGridView(
+                                  itemBuilder: (builderContext, index) {
+                                    ProductModel product = products[index];
+                                    return GestureDetector(
+                                      onTap: () {
+                                        try {
+                                          BottomSheetHelper.showBottomSheet(
+                                            context: builderContext,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                BottomSheetItem(
+                                                  title: 'ویرایش',
+                                                  color: kGreenColor,
+                                                  icon: Icons.edit_note_rounded,
+                                                  onTap: () {
+                                                    try {
+                                                      ToastPackage.showSimpleToast(context: context, message: 'به زودی...');
+                                                      context.pop();
+                                                    } catch (_) {}
+                                                  },
+                                                ),
+                                                BottomSheetItem(
+                                                  title: 'حذف',
+                                                  color: kRedColor,
+                                                  icon: Icons.delete,
+                                                  onTap: () {
+                                                    try {
+                                                      PopupHelpers.showYesOrNoDialog(
+                                                        context: context,
+                                                        title: '"${product.name}" را حذف میکنید؟',
+                                                        onYesTap: (bCtx) {
+                                                          bCtx.pop();
+                                                          builderContext.pop();
+                                                          context.read<HomeBloc>().add(DeleteProduct(id: product.id));
+                                                        },
+                                                      );
+                                                    } catch (_) {}
+                                                  },
+                                                ),
+                                                BottomSheetItem(
+                                                  title: 'جزئیات',
+                                                  color: kBlueColor,
+                                                  icon: Icons.info_outline_rounded,
+                                                  bottom: true,
+                                                  onTap: () {
+                                                    try {
+                                                      context.pop();
+                                                      context.push(
+                                                        ProductDetailsScreen.id,
+                                                        extra: {'product_id': product.id, 'product_name': product.name},
+                                                      );
+                                                    } catch (_) {}
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        } catch (_) {}
+                                      },
+                                      child: HomeProductModelCard(
+                                        name: product.name,
+                                        total: product.total,
+                                        color: context.read<AppProvider>().getStableColor(index),
+                                      ),
+                                    );
+                                  },
+                                  length: products.length,
+                                  crossAxisCount: layout,
+                                ),
                               );
                             },
                           ),

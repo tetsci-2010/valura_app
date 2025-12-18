@@ -24,7 +24,7 @@ class CustomAppbar extends StatelessWidget {
       ),
       padding: EdgeInsets.fromLTRB(
         sizeConstants.spacing16,
-        ScreenUtil().statusBarHeight,
+        ScreenUtil().statusBarHeight + sizeConstants.spacing12,
         sizeConstants.spacing16,
         sizeConstants.spacing16,
       ),

@@ -41,3 +41,5 @@ const kYellowColor = Colors.yellow;
 
 const Color darkBoxShadowColor = kGreyColor;
 const Color lightBoxShadowColor = kBlackColor;
+
+const Color cardColor = Color.fromARGB(255, 32, 32, 32);

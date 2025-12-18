@@ -119,4 +119,115 @@ class PopupHelpers {
       },
     );
   }
+
+  static void showWarningYesOrNoDialog({
+    required BuildContext context,
+    required String title,
+    Function()? onNoTap,
+    Function(BuildContext bCtx)? onYesTap,
+    String? description,
+    IconData? icon,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          contentPadding: EdgeInsets.all(sizeConstants.spacing12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(sizeConstants.radiusMedium)),
+          content: Material(
+            type: MaterialType.transparency,
+            child: Container(
+              padding: EdgeInsets.all(sizeConstants.spacing8),
+              // margin: EdgeInsets.all(sizeConstants.spacing12),
+              decoration: BoxDecoration(
+                border: Border.all(color: Theme.of(context).primaryColor),
+                borderRadius: BorderRadius.circular(sizeConstants.radiusMedium),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: sizeConstants.spacing32),
+                    decoration: BoxDecoration(
+                      color: kRedColor,
+                      borderRadius: BorderRadius.circular(sizeConstants.radiusMedium),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(icon ?? Icons.cloud_download, size: sizeConstants.iconXL, color: kWhiteColor),
+                  ),
+                  SizedBox(height: sizeConstants.spacing12),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: sizeConstants.spacing8),
+                    child: Text(
+                      title,
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
+                  SizedBox(height: sizeConstants.spacing8),
+                  if (description != null)
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: sizeConstants.spacing8),
+                      child: Text(
+                        description,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold, color: kRedColor),
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                  if (description != null) SizedBox(height: sizeConstants.spacing12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: GestureDetector(
+                          onTap:
+                              onNoTap ??
+                              () {
+                                try {
+                                  context.pop();
+                                } catch (_) {}
+                              },
+                          child: Center(
+                            child: Text(
+                              'خیر',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 5),
+                        width: 1.5,
+                        height: 20,
+                        color: Theme.of(context).primaryColor.withAlpha(100),
+                      ),
+                      Flexible(
+                        child: GestureDetector(
+                          onTap: () {
+                            if (onYesTap != null) {
+                              onYesTap(context);
+                            }
+                          },
+                          child: Center(
+                            child: Text(
+                              'بله',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: sizeConstants.spacing8),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }

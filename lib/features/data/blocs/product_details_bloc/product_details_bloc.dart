@@ -1,15 +1,18 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:valura/constants/exceptions.dart';
+import 'package:valura/features/data/blocs/home_bloc/home_bloc.dart';
 import 'package:valura/features/data/models/item_model.dart';
 import 'package:valura/features/data/services/item_service.dart';
+import 'package:valura/packages/sqflite_package/sqflite_codes.dart';
 
 part 'product_details_event.dart';
 part 'product_details_state.dart';
 
 class ProductDetailsBloc extends Bloc<ProductDetailsEvent, ProductDetailsState> {
   final ItemService itemService;
-  ProductDetailsBloc(this.itemService) : super(ProductDetailsInitial()) {
+  final HomeBloc homeBloc;
+  ProductDetailsBloc(this.itemService, this.homeBloc) : super(ProductDetailsInitial()) {
     on<FetchProductDetails>(_onFetchProductDetails);
     on<DeleteProductDetail>(_onDeleteProductDetail);
   }
@@ -31,6 +34,11 @@ class ProductDetailsBloc extends Bloc<ProductDetailsEvent, ProductDetailsState> 
       emit(DeletingProductDetail());
       final result = await itemService.deleteProductDetail(id: event.id, pId: event.pId);
       add(FetchProductDetails(id: event.pId));
+      if (result == SqfliteCodes.successCodeWithDelete) {
+        await Future.delayed(const Duration(milliseconds: 700));
+        homeBloc.add(DeleteProduct(id: event.pId));
+        emit(DeleteProductDetailSuccess(message: result));
+      }
       emit(DeleteProductDetailSuccess(message: result));
     } on AppException catch (e) {
       emit(DeleteProductDetailFailure(errorMessage: e.errorMessage, statusCode: e.statusCode));

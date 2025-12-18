@@ -2,10 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:valura/constants/colors.dart';
 import 'package:valura/features/data/blocs/create_item_bloc/create_item_bloc.dart';
 import 'package:valura/features/data/models/item_model.dart';
 import 'package:valura/helpers/number_formatters.dart';
+import 'package:valura/helpers/popup_helpers.dart';
+import 'package:valura/packages/sqflite_package/sqflite_codes.dart';
 import 'package:valura/packages/toast_package/toast_package.dart';
 import 'package:valura/utils/size_constant.dart';
 import 'package:valura/widgets/custom_appbar.dart';
@@ -72,7 +75,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
                 newRateController.clear();
                 descController.clear();
               } else if (state is CreateItemFailure) {
-                ToastPackage.showWarningToast(context: context, message: state.errorMessage);
+                ToastPackage.showSimpleToast(context: context, message: getErrorMessage(state.errorMessage));
               }
             },
             builder: (context, state) {
@@ -267,7 +270,14 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
                                     newRate: num.tryParse(NumberFormatters.toEnglishDigits(newRateController.text.trim())) ?? 0,
                                     description: descController.text.trim(),
                                   );
-                                  context.read<CreateItemBloc>().add(CreateItem(itemModel: item));
+                                  PopupHelpers.showYesOrNoDialog(
+                                    context: context,
+                                    title: 'فرم را ثبت میکنید؟',
+                                    onYesTap: (bCtx) {
+                                      context.read<CreateItemBloc>().add(CreateItem(itemModel: item));
+                                      bCtx.pop();
+                                    },
+                                  );
                                 } else {
                                   HapticFeedback.heavyImpact();
                                 }
@@ -282,11 +292,18 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
                               child: Icon(Icons.delete),
                               onPressed: () {
                                 try {
-                                  nameController.clear();
-                                  purchaseRateController.clear();
-                                  landingExpenseController.clear();
-                                  unitCostController.clear();
-                                  descController.clear();
+                                  PopupHelpers.showYesOrNoDialog(
+                                    context: context,
+                                    title: 'فرم را پاک میکنید؟',
+                                    onYesTap: (bCtx) {
+                                      nameController.clear();
+                                      purchaseRateController.clear();
+                                      landingExpenseController.clear();
+                                      unitCostController.clear();
+                                      descController.clear();
+                                      bCtx.pop();
+                                    },
+                                  );
                                 } catch (_) {}
                               },
                             ),

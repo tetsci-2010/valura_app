@@ -6,7 +6,10 @@ import 'package:valura/constants/colors.dart';
 import 'package:valura/features/data/blocs/edit_item_bloc/edit_item_bloc.dart';
 import 'package:valura/features/data/models/item_model.dart';
 import 'package:valura/features/data/providers/add_item_provider.dart';
+import 'package:valura/features/screens/main_screens/items_screen/items_screen.dart';
 import 'package:valura/helpers/number_formatters.dart';
+import 'package:valura/helpers/popup_helpers.dart';
+import 'package:valura/packages/sqflite_package/sqflite_codes.dart';
 import 'package:valura/packages/toast_package/toast_package.dart';
 import 'package:valura/utils/size_constant.dart';
 import 'package:valura/widgets/custom_appbar.dart';
@@ -18,8 +21,9 @@ class EditItemScreen extends StatefulWidget {
   static const String id = '/edit_item_screen';
   static const String name = 'edit_item_screen';
   final ItemModel? itemModel;
-  final int? itemId;
-  const EditItemScreen({super.key, this.itemModel, this.itemId});
+  final int? pId;
+  final String? route;
+  const EditItemScreen({super.key, this.itemModel, this.pId, this.route});
 
   @override
   State<EditItemScreen> createState() => _EditItemScreenState();
@@ -42,20 +46,31 @@ class _EditItemScreenState extends State<EditItemScreen> {
     unitCostController = TextEditingController();
     descController = TextEditingController();
     newRateController = TextEditingController();
-    if (widget.itemModel != null) {
-      ItemModel item = widget.itemModel!;
-      String desc = item.description ?? '';
-      nameController.text = item.name;
-      purchaseRateController.text = '${item.purchaseRate}';
-      landingExpenseController.text = '${item.landCost}';
-      unitCostController.text = '${item.unitCost}';
-      descController.text = desc;
-      newRateController.text = '${item.newRate}';
+    if (widget.route == ItemsScreen.id) {
+      context.read<EditItemBloc>().add(EditItem(id: widget.itemModel!.id));
     } else {
-      if (widget.itemId != null) {
-        context.read<EditItemBloc>().add(EditItem(id: widget.itemId!));
+      if (widget.pId == null) {
+        if (widget.itemModel != null) {
+          ItemModel item = widget.itemModel!;
+          String desc = item.description ?? '';
+          nameController.text = item.name;
+          purchaseRateController.text = '${item.purchaseRate}';
+          landingExpenseController.text = '${item.landCost}';
+          unitCostController.text = '${item.unitCost}';
+          descController.text = desc;
+          newRateController.text = '${item.newRate}';
+        } else {
+          HapticFeedback.heavyImpact();
+        }
+      } else {
+        if (widget.pId != null && widget.itemModel != null) {
+          context.read<EditItemBloc>().add(EditProductDetails(id: widget.itemModel!.id));
+        } else {
+          HapticFeedback.heavyImpact();
+        }
       }
     }
+
     formKey = GlobalKey<FormState>();
   }
 
@@ -81,7 +96,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
           editState = state;
         } else if (state is EditItemFailure) {
           editState = state;
-          ToastPackage.showSimpleToast(context: context, message: state.errorMessage);
+          ToastPackage.showSimpleToast(context: context, message: getErrorMessage(state.errorMessage));
         } else if (state is EditItemSuccess) {
           editState = state;
           if (state.item == null) {
@@ -96,6 +111,18 @@ class _EditItemScreenState extends State<EditItemScreen> {
             descController.text = desc;
             newRateController.text = '${item.newRate}';
           }
+        } else if (state is UpdateProductDetailsSuccess) {
+          ToastPackage.showSimpleToast(context: context, message: 'ویرایش انجام شد');
+          context.pop();
+        } else if (state is UpdateProductDetailsFailure) {
+          ToastPackage.showSimpleToast(context: context, message: getErrorMessage(state.errorMessage));
+        } else if (state is UpdateItemSuccess) {
+          ToastPackage.showSimpleToast(context: context, message: 'ویرایش انجام شد');
+          Future.delayed(const Duration(milliseconds: 800), () {
+            if (mounted && context.mounted) {
+              context.pop();
+            }
+          });
         }
       },
       builder: (context, state) {
@@ -268,7 +295,8 @@ class _EditItemScreenState extends State<EditItemScreen> {
                         ),
                       ),
                     ),
-                    if (editState is EditingItem) Positioned.fill(child: LoadingCover()),
+                    if (editState is EditingItem || editState is UpdatingItem || editState is UpdatingProductDetails)
+                      Positioned.fill(child: LoadingCover()),
                   ],
                 ),
               ),
@@ -292,22 +320,36 @@ class _EditItemScreenState extends State<EditItemScreen> {
                       onPressed: () {
                         try {
                           if (formKey.currentState?.validate() == true) {
-                            if (widget.itemModel != null) {
-                              ItemModel item = ItemModel(
-                                id: widget.itemModel!.id,
-                                itemId: widget.itemModel!.itemId,
-                                purchaseRate: num.tryParse(NumberFormatters.toEnglishDigits(purchaseRateController.text.trim())) ?? 0,
-                                name: nameController.text.trim(),
-                                unitCost: num.tryParse(NumberFormatters.toEnglishDigits(unitCostController.text.trim())) ?? 0,
-                                landCost: num.tryParse(NumberFormatters.toEnglishDigits(landingExpenseController.text.trim())) ?? 0,
-                                newRate: num.tryParse(NumberFormatters.toEnglishDigits(newRateController.text.trim())) ?? 0,
-                                description: descController.text.trim(),
-                              );
-                              List<ItemModel> items = context.read<AddItemProvider>().addedItems;
-                              items.removeWhere((element) => element.id == widget.itemModel!.id);
-                              context.read<AddItemProvider>().addItem(item);
-                              context.pop();
-                            } else {}
+                            ItemModel item = ItemModel(
+                              id: widget.itemModel!.id,
+                              itemId: widget.itemModel!.itemId,
+                              purchaseRate: num.tryParse(NumberFormatters.toEnglishDigits(purchaseRateController.text.trim())) ?? 0,
+                              name: nameController.text.trim(),
+                              unitCost: num.tryParse(NumberFormatters.toEnglishDigits(unitCostController.text.trim())) ?? 0,
+                              landCost: num.tryParse(NumberFormatters.toEnglishDigits(landingExpenseController.text.trim())) ?? 0,
+                              newRate: num.tryParse(NumberFormatters.toEnglishDigits(newRateController.text.trim())) ?? 0,
+                              description: descController.text.trim(),
+                            );
+                            PopupHelpers.showYesOrNoDialog(
+                              context: context,
+                              title: 'فرم را ذخیره میکنید؟',
+                              onYesTap: (bCtx) {
+                                if (widget.itemModel != null && widget.pId == null && widget.route != ItemsScreen.id) {
+                                  List<ItemModel> items = context.read<AddItemProvider>().addedItems;
+                                  items.removeWhere((element) => element.id == widget.itemModel!.id);
+                                  context.read<AddItemProvider>().addItem(item);
+                                  bCtx.pop();
+                                  context.pop();
+                                } else {
+                                  if (widget.route == ItemsScreen.id) {
+                                    context.read<EditItemBloc>().add(UpdateItem(item: item));
+                                  } else {
+                                    context.read<EditItemBloc>().add(UpdateProductDetails(item: item, pId: widget.pId!));
+                                  }
+                                  bCtx.pop();
+                                }
+                              },
+                            );
                           } else {
                             HapticFeedback.heavyImpact();
                           }

@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     try {
-      Timer(const Duration(seconds: 3), () {
+      Timer(const Duration(seconds: 2), () {
         context.go(MainHomeScreen.id);
       });
     } catch (_) {}
@@ -33,9 +33,12 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Center(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(1000),
-            child: Image.asset(
-              ImagesPaths.valuraTextJpg,
-              height: sizeConstants.imageLarge,
+            child: Hero(
+              tag: 'image',
+              child: Image.asset(
+                ImagesPaths.valuraTextJpg,
+                height: sizeConstants.imageLarge,
+              ),
             ),
           ),
         ),

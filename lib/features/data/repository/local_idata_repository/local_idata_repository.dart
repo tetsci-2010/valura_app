@@ -1,5 +1,6 @@
 import 'package:valura/constants/exceptions.dart';
 import 'package:valura/features/data/enums/sort.dart';
+import 'package:valura/features/data/models/backup_model.dart';
 import 'package:valura/features/data/models/item_model.dart';
 import 'package:valura/features/data/models/product_form_model.dart';
 import 'package:valura/features/data/models/product_model.dart';
@@ -90,6 +91,107 @@ class LocalDataRepositoryImp implements ILocalDataRepository {
   Future<String> deleteProductDetail({required int id, required int pId}) async {
     try {
       final result = await localDataDataSource.deleteProductDetail(id: id, pId: pId);
+      return result;
+    } on AppException catch (_) {
+      rethrow;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<String> updateProductDetail({required ItemModel item, required int pId}) async {
+    try {
+      final result = await localDataDataSource.updateProductDetail(item: item, pId: pId);
+      return result;
+    } on AppException catch (_) {
+      rethrow;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<String> backupDB() async {
+    try {
+      final result = await localDataDataSource.backupDB();
+      return result;
+    } on AppException catch (_) {
+      rethrow;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<List<BackupModel>> fetchBackups() async {
+    try {
+      final result = await localDataDataSource.fetchBackups();
+      return result;
+    } on AppException catch (_) {
+      rethrow;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<String> deleteBackup(String path) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String> restoreBackup() async {
+    try {
+      final result = await localDataDataSource.restoreBackup();
+      return result;
+    } on AppException catch (_) {
+      rethrow;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<String> deleteItem(int? id) async {
+    try {
+      final result = await localDataDataSource.deleteItem(id);
+      return result;
+    } on AppException catch (_) {
+      rethrow;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<ItemModel> editItem(int id) async {
+    try {
+      final result = await localDataDataSource.editItem(id);
+      return result;
+    } on AppException catch (_) {
+      rethrow;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<List<ItemModel>> fetchItems(Sort? sort) async {
+    try {
+      final result = await localDataDataSource.fetchItems(sort);
+      return result;
+    } on AppException catch (_) {
+      rethrow;
+    } catch (e) {
+      throw AppException(e.toString());
+    }
+  }
+
+  @override
+  Future<String> updateItem(ItemModel item) async {
+    try {
+      final result = await localDataDataSource.updateItem(item);
       return result;
     } on AppException catch (_) {
       rethrow;

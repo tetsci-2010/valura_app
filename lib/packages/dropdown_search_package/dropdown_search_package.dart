@@ -23,6 +23,12 @@ class DropdownSearchPackage {
         decoratorProps: DropDownDecoratorProps(),
         items: items,
         popupProps: PopupProps.menu(
+          containerBuilder: (context, popupWidget) {
+            return Container(
+              decoration: BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor),
+              child: popupWidget,
+            );
+          },
           showSearchBox: showSearchBox,
           emptyBuilder: (context, searchEntry) {
             return Center(

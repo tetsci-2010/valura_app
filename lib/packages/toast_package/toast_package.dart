@@ -22,10 +22,18 @@ class ToastPackage {
       autoCloseDuration: closeDuration ?? Duration(seconds: 3),
       dragToClose: dragToClose,
       closeOnClick: clickToClose,
+      borderSide: BorderSide(color: Theme.of(context).primaryColor),
       showProgressBar: showProgressBar ?? true,
       primaryColor: Theme.of(context).primaryColor,
-      progressBarTheme: ProgressIndicatorThemeData(color: Theme.of(context).primaryColor),
-      closeButton: ToastCloseButton(showType: CloseButtonShowType.always),
+      progressBarTheme: ProgressIndicatorThemeData(color: Theme.of(context).primaryColor, linearTrackColor: Theme.of(context).shadowColor),
+      closeButton: ToastCloseButton(
+        showType: CloseButtonShowType.always,
+        buttonBuilder: (context, onClose) => GestureDetector(
+          onTap: onClose,
+          child: Icon(Icons.close, color: kRedColor),
+        ),
+      ),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     );
   }
 

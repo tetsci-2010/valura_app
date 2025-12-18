@@ -6,6 +6,7 @@ import 'package:valura/features/data/models/item_model.dart';
 import 'package:valura/features/screens/main_screens/add_item_screen/widgets/item_part_card.dart';
 import 'package:valura/features/screens/main_screens/edit_item_screen/edit_item_screen.dart';
 import 'package:valura/helpers/popup_helpers.dart';
+import 'package:valura/packages/sqflite_package/sqflite_codes.dart';
 import 'package:valura/packages/toast_package/toast_package.dart';
 import 'package:valura/utils/size_constant.dart';
 import 'package:valura/widgets/custom_aligned_grid_view.dart';
@@ -43,7 +44,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             child: BlocConsumer<ProductDetailsBloc, ProductDetailsState>(
               listener: (context, state) {
                 if (state is FetchProductDetailsFailure) {
-                  ToastPackage.showSimpleToast(context: context, message: state.errorMessage);
+                  ToastPackage.showSimpleToast(context: context, message: getErrorMessage(state.errorMessage));
+                } else if (state is DeleteProductDetailFailure) {
+                  ToastPackage.showSimpleToast(context: context, message: getErrorMessage(state.errorMessage));
+                } else if (state is DeleteProductDetailSuccess) {
+                  if (state.message == SqfliteCodes.successCodeWithDelete) {
+                    context.pop();
+                  }
                 }
               },
               builder: (context, state) {
@@ -61,7 +68,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             item: item,
                             onEditTap: (context) {
                               try {
-                                context.push(EditItemScreen.id, extra: {'item_id': item.id});
+                                context.push(EditItemScreen.id, extra: {'item_model': item, 'p_id': widget.productId});
                               } catch (_) {}
                             },
                             onDeleteTap: (mContext) {

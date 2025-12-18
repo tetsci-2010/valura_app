@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:valura/features/data/models/item_model.dart';
 import 'package:valura/features/screens/initial_screens/splash_screen.dart';
+import 'package:valura/features/screens/main_screens/backup_screen/backup_screen.dart';
 import 'package:valura/features/screens/main_screens/create_item_screen/create_item_screen.dart';
 import 'package:valura/features/screens/main_screens/edit_item_screen/edit_item_screen.dart';
 import 'package:valura/features/screens/main_screens/home_screen/home_screen.dart';
@@ -47,9 +48,15 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) {
         Map<String, dynamic> jsonData = state.extra as Map<String, dynamic>;
         ItemModel? item = jsonData['item_model'] as ItemModel?;
-        int? itemId = jsonData['item_id'] as int?;
-        return EditItemScreen(itemModel: item, itemId: itemId);
+        int? pId = jsonData['p_id'] as int?;
+        String? route = jsonData['route'] as String?;
+        return EditItemScreen(itemModel: item, pId: pId, route: route);
       },
+    ),
+    GoRoute(
+      path: BackupScreen.id,
+      name: BackupScreen.name,
+      builder: (context, state) => BackupScreen(),
     ),
   ],
 );
