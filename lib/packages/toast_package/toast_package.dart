@@ -14,6 +14,7 @@ class ToastPackage {
     bool? showProgressBar,
   }) {
     Toastification toast = Toastification();
+    toast.dismissAll();
     toast.show(
       title: Text(message, style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold)),
       type: ToastificationType.info,

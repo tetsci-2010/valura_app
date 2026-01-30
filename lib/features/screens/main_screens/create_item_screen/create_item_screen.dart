@@ -121,6 +121,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
                             isRequired: true,
                             titleStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).primaryColor),
                             child: CustomTextFormField(
+                              keybaordType: TextInputType.number,
                               readOnly: state is CreatingItem,
                               controller: purchaseRateController,
                               hintText: 'نرخ خرید را وارد کنید',
@@ -148,6 +149,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
                             isRequired: true,
                             titleStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).primaryColor),
                             child: CustomTextFormField(
+                              keybaordType: TextInputType.number,
                               readOnly: state is CreatingItem,
                               controller: landingExpenseController,
                               hintText: 'مقدار مصرف را وارد کنید',
@@ -175,6 +177,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
                             isRequired: true,
                             titleStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).primaryColor),
                             child: CustomTextFormField(
+                              keybaordType: TextInputType.number,
                               readOnly: state is CreatingItem,
                               controller: unitCostController,
                               hintText: 'قیمت را وارد کنید',
@@ -202,6 +205,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
                             isRequired: true,
                             titleStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).primaryColor),
                             child: CustomTextFormField(
+                              keybaordType: TextInputType.number,
                               readOnly: state is CreatingItem,
                               controller: newRateController,
                               hintText: 'نرخ فروش را وارد کنید',

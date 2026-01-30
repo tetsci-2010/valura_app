@@ -162,8 +162,10 @@ class LocalDataDataSourceImp implements ILocalDataDataSource {
         List<ItemModel> pItems = items.map((e) => ItemModel.fromDB(e)).toList();
         // items.forEach((element) => print(element));
         // return [];
+        num total = 0;
+        total = pItems.fold<num>(0, (previousValue, element) => previousValue + element.newRate);
         pProducts.add(
-          ProductModel(id: product['id'], name: product['name'], total: product['total'], items: pItems),
+          ProductModel(id: product['id'], name: product['name'], total: total, items: pItems),
         );
       }
       return pProducts;
@@ -684,7 +686,6 @@ class LocalDataDataSourceImp implements ILocalDataDataSource {
   Future<ItemModel> editItem(int id) async {
     try {
       SqflitePackage db = SqflitePackage();
-      print(id);
       List<Map<String, dynamic>> items = await db.query(table: itemsTable, where: 'id = ?', whereArgs: [id]);
       if (items.isEmpty) throw AppException(SqfliteCodes.itemNotFound);
       ItemModel item = ItemModel.fromDB(items.first);

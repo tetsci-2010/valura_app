@@ -7,6 +7,7 @@ import 'package:valura/constants/colors.dart';
 import 'package:valura/constants/lists.dart';
 import 'package:valura/features/data/providers/app_provider.dart';
 import 'package:valura/utils/dependency_injection.dart';
+import 'package:valura/utils/exit_app.dart';
 import 'package:valura/utils/size_constant.dart';
 
 class MainHomeScreen extends StatelessWidget {
@@ -21,12 +22,15 @@ class MainHomeScreen extends StatelessWidget {
       builder: (context, selectedIndex, child) {
         return Scaffold(
           body: PopScope(
-            canPop: selectedIndex == 0,
-            onPopInvokedWithResult: (didPop, result) {
+            canPop: false,
+            onPopInvokedWithResult: (didPop, result) async {
               try {
                 if (didPop) return;
                 if (selectedIndex == 0) {
-                  exit(exitCode);
+                  final exitConfirm = await ExitApp.onWillPop(context);
+                  if (exitConfirm) {
+                    exit(0);
+                  }
                 } else {
                   di<AppProvider>().updateSelectedScreen(0);
                 }

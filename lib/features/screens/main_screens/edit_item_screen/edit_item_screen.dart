@@ -175,6 +175,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
                                   isRequired: true,
                                   titleStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).primaryColor),
                                   child: CustomTextFormField(
+                                    keybaordType: TextInputType.number,
                                     controller: purchaseRateController,
                                     hintText: 'نرخ خرید را وارد کنید',
                                     validator: (text) {
@@ -201,6 +202,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
                                   isRequired: true,
                                   titleStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).primaryColor),
                                   child: CustomTextFormField(
+                                    keybaordType: TextInputType.number,
                                     controller: landingExpenseController,
                                     hintText: 'مقدار مصرف را وارد کنید',
                                     validator: (text) {
@@ -227,6 +229,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
                                   isRequired: true,
                                   titleStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).primaryColor),
                                   child: CustomTextFormField(
+                                    keybaordType: TextInputType.number,
                                     controller: unitCostController,
                                     hintText: 'قیمت را وارد کنید',
                                     validator: (text) {
@@ -253,6 +256,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
                                   isRequired: true,
                                   titleStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).primaryColor),
                                   child: CustomTextFormField(
+                                    keybaordType: TextInputType.number,
                                     controller: newRateController,
                                     hintText: 'نرخ فروش را وارد کنید',
                                     validator: (text) {

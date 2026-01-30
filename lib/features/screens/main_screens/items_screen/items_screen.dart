@@ -6,7 +6,6 @@ import 'package:valura/constants/colors.dart';
 import 'package:valura/features/data/blocs/items_list_bloc/items_list_bloc.dart';
 import 'package:valura/features/data/enums/sort.dart';
 import 'package:valura/features/data/models/item_model.dart';
-import 'package:valura/features/data/providers/items_list_provider.dart';
 import 'package:valura/features/screens/main_screens/add_item_screen/widgets/item_part_card.dart';
 import 'package:valura/features/screens/main_screens/edit_item_screen/edit_item_screen.dart';
 import 'package:valura/helpers/bottom_sheet_helper.dart';
@@ -18,7 +17,6 @@ import 'package:valura/utils/size_constant.dart';
 import 'package:valura/widgets/bottom_sheet_item.dart';
 import 'package:valura/widgets/custom_aligned_grid_view.dart';
 import 'package:valura/widgets/custom_appbar.dart';
-import 'package:valura/widgets/loading_cover.dart';
 import 'package:valura/widgets/try_again_btn.dart';
 
 class ItemsScreen extends StatefulWidget {
@@ -95,7 +93,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
                                       try {
                                         PopupHelpers.showYesOrNoDialog(
                                           context: context,
-                                          title: 'لیست تولید را پاک میکنید؟',
+                                          title: 'لیست اجناس را پاک میکنید؟',
                                           onYesTap: (bCtx) {
                                             bCtx.pop();
                                             context.pop();
@@ -147,33 +145,40 @@ class _ItemsScreenState extends State<ItemsScreen> {
                 List<ItemModel> items = state.items;
                 return Expanded(
                   child: items.isNotEmpty
-                      ? CustomAlignedGridView(
-                          paddings: EdgeInsets.symmetric(horizontal: sizeConstants.spacing12),
-                          itemBuilder: (builderContext, index) {
-                            ItemModel item = items[index];
-                            return ItemPartCard(
-                              item: item,
-                              onDeleteTap: (context) {
-                                try {
-                                  PopupHelpers.showYesOrNoDialog(
-                                    context: context,
-                                    title: 'آیتم "${item.name}" را حذف میکنید؟',
-                                    onYesTap: (bCtx) {
-                                      di<ItemsListBloc>().add(DeleteItem(id: item.id));
-                                      bCtx.pop();
-                                    },
-                                  );
-                                } catch (_) {}
-                              },
-                              onEditTap: (context) {
-                                try {
-                                  context.push(EditItemScreen.id, extra: {'item_model': item, 'route': ItemsScreen.id});
-                                } catch (_) {}
-                              },
-                            );
+                      ? RefreshIndicator(
+                          onRefresh: () async {
+                            try {
+                              context.read<ItemsListBloc>().add(FetchItemsList());
+                            } catch (_) {}
                           },
-                          length: items.length,
-                          crossAxisCount: 1,
+                          child: CustomAlignedGridView(
+                            paddings: EdgeInsets.symmetric(horizontal: sizeConstants.spacing12),
+                            itemBuilder: (builderContext, index) {
+                              ItemModel item = items[index];
+                              return ItemPartCard(
+                                item: item,
+                                onDeleteTap: (context) {
+                                  try {
+                                    PopupHelpers.showYesOrNoDialog(
+                                      context: context,
+                                      title: 'آیتم "${item.name}" را حذف میکنید؟',
+                                      onYesTap: (bCtx) {
+                                        di<ItemsListBloc>().add(DeleteItem(id: item.id));
+                                        bCtx.pop();
+                                      },
+                                    );
+                                  } catch (_) {}
+                                },
+                                onEditTap: (context) {
+                                  try {
+                                    context.push(EditItemScreen.id, extra: {'item_model': item, 'route': ItemsScreen.id});
+                                  } catch (_) {}
+                                },
+                              );
+                            },
+                            length: items.length,
+                            crossAxisCount: 1,
+                          ),
                         )
                       : Center(
                           child: Text('هیچ آیتمی وجود ندارد.'),

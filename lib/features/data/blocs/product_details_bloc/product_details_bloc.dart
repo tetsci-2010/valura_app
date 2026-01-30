@@ -38,8 +38,10 @@ class ProductDetailsBloc extends Bloc<ProductDetailsEvent, ProductDetailsState> 
         await Future.delayed(const Duration(milliseconds: 700));
         homeBloc.add(DeleteProduct(id: event.pId));
         emit(DeleteProductDetailSuccess(message: result));
+      } else {
+        homeBloc.add(FetchProducts());
+        emit(DeleteProductDetailSuccess(message: result));
       }
-      emit(DeleteProductDetailSuccess(message: result));
     } on AppException catch (e) {
       emit(DeleteProductDetailFailure(errorMessage: e.errorMessage, statusCode: e.statusCode));
     } catch (e) {
